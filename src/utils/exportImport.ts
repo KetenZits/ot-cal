@@ -15,6 +15,8 @@ export function buildBackupPayload(
     settings: {
       hourlyRate: settings.hourlyRate,
       normalEndTime: settings.normalEndTime,
+      periodStartDay: settings.periodStartDay,
+      periodEndDay: settings.periodEndDay,
     },
     otRecords: otRecords.map((record) => ({
       workDate: record.workDate,

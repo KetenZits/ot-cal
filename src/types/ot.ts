@@ -27,7 +27,7 @@ export interface OTPeriodSummary {
   otDays: number;
 }
 
-export type DashboardPeriod = "week" | "month" | "year";
+export type DashboardPeriod = "week" | "month" | "year" | "custom";
 
 export interface ChartPoint {
   key: string;

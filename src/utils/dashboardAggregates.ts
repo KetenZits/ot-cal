@@ -1,15 +1,14 @@
 import type { OTRecord, OTPeriodSummary, ChartPoint } from "@/types/ot";
 import {
   addDays,
-  addMonths,
+  differenceInCalendarDays,
   eachDayOfInterval,
   endOfWeek,
   format,
-  startOfMonth,
   startOfWeek,
 } from "date-fns";
 import { th } from "date-fns/locale";
-import { toDateKey } from "./dateHelpers";
+import { getOtYearBucketRange, toDateKey } from "./dateHelpers";
 
 export function summarizeRecords(records: OTRecord[]): OTPeriodSummary {
   const totalOTMinutes = records.reduce((sum, record) => sum + record.otMinutes, 0);
@@ -73,28 +72,42 @@ export function monthChartData(
   return weeks;
 }
 
-export function yearChartData(
+export function periodChartData(
   records: OTRecord[],
-  yearStart: Date,
+  rangeStart: Date,
+  rangeEnd: Date,
+): ChartPoint[] {
+  const days = differenceInCalendarDays(rangeEnd, rangeStart) + 1;
+  if (days <= 16) {
+    return weekChartData(records, rangeStart, rangeEnd);
+  }
+  return monthChartData(records, rangeStart, rangeEnd);
+}
+
+export function yearPeriodChartData(
+  records: OTRecord[],
+  year: Date,
+  startDay: number,
+  endDay: number,
 ): ChartPoint[] {
   const byDate = indexByDate(records);
 
   return Array.from({ length: 12 }, (_, monthIndex) => {
-    const monthDate = addMonths(yearStart, monthIndex);
-    const start = startOfMonth(monthDate);
-    const label = format(start, "MMM", { locale: th });
-    const prefix = format(start, "yyyy-MM");
+    const monthDate = new Date(year.getFullYear(), monthIndex, 1);
+    const { start, end } = getOtYearBucketRange(monthDate, startDay, endDay, monthIndex);
+    const startKey = toDateKey(start);
+    const endKey = toDateKey(end);
     let amount = 0;
 
     for (const [key, record] of byDate) {
-      if (key.startsWith(prefix)) {
+      if (key >= startKey && key <= endKey) {
         amount += record.otAmount;
       }
     }
 
     return {
-      key: prefix,
-      label,
+      key: format(monthDate, "yyyy-MM"),
+      label: format(monthDate, "MMM", { locale: th }),
       amount,
     };
   });

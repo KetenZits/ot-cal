@@ -45,17 +45,23 @@ export interface Database {
           id: number;
           hourly_rate: string;
           normal_end_time: string;
+          period_start_day: number;
+          period_end_day: number;
           updated_at: string;
         };
         Insert: {
           id?: number;
           hourly_rate?: number | string;
           normal_end_time?: string;
+          period_start_day?: number;
+          period_end_day?: number;
           updated_at?: string;
         };
         Update: {
           hourly_rate?: number | string;
           normal_end_time?: string;
+          period_start_day?: number;
+          period_end_day?: number;
           updated_at?: string;
         };
         Relationships: [];

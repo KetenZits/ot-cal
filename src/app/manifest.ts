@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "คำนวณและติดตามค่าล่วงเวลา",
     start_url: "/",
     display: "standalone",
-    background_color: "#5B4BFF",
-    theme_color: "#5B4BFF",
+    background_color: "#4F3DFF",
+    theme_color: "#4F3DFF",
     lang: "th",
     orientation: "portrait",
     icons: [

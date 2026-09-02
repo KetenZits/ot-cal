@@ -3,24 +3,50 @@ import "server-only";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { normalizeTime } from "@/utils/dateHelpers";
 import { parseNumeric } from "@/utils/format";
-import type { AppSettings } from "@/types/settings";
+import type { AppSettings, SettingsUpdate } from "@/types/settings";
 import type { Database } from "@/types/database";
 
 type SettingsRow = Database["public"]["Tables"]["app_settings"]["Row"];
+type SettingsRowLike = Omit<SettingsRow, "period_start_day" | "period_end_day"> & {
+  period_start_day?: number | null;
+  period_end_day?: number | null;
+};
 
 const DEFAULT_SETTINGS = {
   id: 1 as const,
   hourlyRate: 75,
   normalEndTime: "17:00",
+  periodStartDay: 26,
+  periodEndDay: 26,
 };
 
-function mapSettings(row: SettingsRow): AppSettings {
+function clampDay(value: number | null | undefined, fallback: number): number {
+  if (value == null || !Number.isFinite(Number(value))) return fallback;
+  return Math.min(31, Math.max(1, Math.trunc(Number(value))));
+}
+
+function mapSettings(row: SettingsRowLike): AppSettings {
   return {
     id: 1,
     hourlyRate: parseNumeric(row.hourly_rate),
     normalEndTime: normalizeTime(row.normal_end_time),
+    periodStartDay: clampDay(row.period_start_day, DEFAULT_SETTINGS.periodStartDay),
+    periodEndDay: clampDay(row.period_end_day, DEFAULT_SETTINGS.periodEndDay),
     updatedAt: row.updated_at,
   };
+}
+
+function isMissingPeriodColumn(error: { message?: string; code?: string } | null): boolean {
+  if (!error?.message) return false;
+  const msg = error.message.toLowerCase();
+  return (
+    error.code === "42703" ||
+    error.code === "PGRST204" ||
+    msg.includes("period_start_day") ||
+    msg.includes("period_end_day") ||
+    msg.includes("schema cache") ||
+    msg.includes("could not find")
+  );
 }
 
 export async function getSettings(): Promise<AppSettings> {
@@ -42,9 +68,29 @@ export async function getSettings(): Promise<AppSettings> {
         id: 1,
         hourly_rate: DEFAULT_SETTINGS.hourlyRate,
         normal_end_time: DEFAULT_SETTINGS.normalEndTime,
+        period_start_day: DEFAULT_SETTINGS.periodStartDay,
+        period_end_day: DEFAULT_SETTINGS.periodEndDay,
       })
       .select()
       .single();
+
+    if (insertError && isMissingPeriodColumn(insertError)) {
+      const { data: fallback, error: fallbackError } = await supabase
+        .from("app_settings")
+        .insert({
+          id: 1,
+          hourly_rate: DEFAULT_SETTINGS.hourlyRate,
+          normal_end_time: DEFAULT_SETTINGS.normalEndTime,
+        })
+        .select()
+        .single();
+
+      if (fallbackError || !fallback) {
+        throw new Error(fallbackError?.message ?? "Failed to create default settings");
+      }
+
+      return mapSettings(fallback);
+    }
 
     if (insertError || !created) {
       throw new Error(insertError?.message ?? "Failed to create default settings");
@@ -56,10 +102,7 @@ export async function getSettings(): Promise<AppSettings> {
   return mapSettings(data);
 }
 
-export async function updateSettings(input: {
-  hourlyRate?: number;
-  normalEndTime?: string;
-}): Promise<AppSettings> {
+export async function updateSettings(input: SettingsUpdate): Promise<AppSettings> {
   const supabase = createServerSupabaseClient();
   const patch: Database["public"]["Tables"]["app_settings"]["Update"] = {};
 
@@ -69,6 +112,12 @@ export async function updateSettings(input: {
   if (input.normalEndTime !== undefined) {
     patch.normal_end_time = input.normalEndTime;
   }
+  if (input.periodStartDay !== undefined) {
+    patch.period_start_day = input.periodStartDay;
+  }
+  if (input.periodEndDay !== undefined) {
+    patch.period_end_day = input.periodEndDay;
+  }
 
   const { data, error } = await supabase
     .from("app_settings")
@@ -76,6 +125,12 @@ export async function updateSettings(input: {
     .eq("id", 1)
     .select()
     .single();
+
+  if (error && isMissingPeriodColumn(error) && (input.periodStartDay !== undefined || input.periodEndDay !== undefined)) {
+    throw new Error(
+      "ยังไม่ได้เพิ่มคอลัมน์รอบนับ OT ในฐานข้อมูล กรุณารันไฟล์ supabase/migrations/002_ot_period.sql ใน SQL Editor ของ Supabase",
+    );
+  }
 
   if (error || !data) {
     throw new Error(error?.message ?? "Failed to update settings");
@@ -88,5 +143,7 @@ export async function resetSettings(): Promise<AppSettings> {
   return updateSettings({
     hourlyRate: DEFAULT_SETTINGS.hourlyRate,
     normalEndTime: DEFAULT_SETTINGS.normalEndTime,
+    periodStartDay: DEFAULT_SETTINGS.periodStartDay,
+    periodEndDay: DEFAULT_SETTINGS.periodEndDay,
   });
 }

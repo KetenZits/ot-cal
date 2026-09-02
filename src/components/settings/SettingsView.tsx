@@ -24,6 +24,7 @@ import type { BackupPayload } from "@/lib/validation/schemas";
 import type { ThemeColors, ThemeConfig } from "@/types/theme";
 import { InstallSection } from "./InstallSection";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { formatPeriodRange, getOtPeriodRange } from "@/utils/dateHelpers";
 
 export function SettingsView() {
   return (
@@ -31,7 +32,7 @@ export function SettingsView() {
       <PageHeader
         eyebrow="Settings"
         title="ตั้งค่า"
-        subtitle="อัตรา OT เวลาเลิกงานปกติ ธีม และการสำรองข้อมูล"
+        subtitle="อัตรา OT รอบนับ เวลาเลิกงานปกติ ธีม และการสำรองข้อมูล"
       />
       <OTSettingsCard />
       <ThemeSection />
@@ -41,30 +42,63 @@ export function SettingsView() {
   );
 }
 
+function parsePeriodDay(value: string): number | null {
+  const next = Number(value);
+  if (!Number.isInteger(next) || next < 1 || next > 31) return null;
+  return next;
+}
+
 function OTSettingsCard() {
   const hourlyRate = useSettingsStore((state) => state.hourlyRate);
   const normalEndTime = useSettingsStore((state) => state.normalEndTime);
+  const periodStartDay = useSettingsStore((state) => state.periodStartDay);
+  const periodEndDay = useSettingsStore((state) => state.periodEndDay);
   const setLocal = useSettingsStore((state) => state.setLocal);
   const hydrate = useSettingsStore((state) => state.hydrate);
   const showToast = useUIStore((state) => state.showToast);
   const online = useOnlineStatus();
 
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit, setValue, watch } = useForm({
     values: {
       hourlyRate: hourlyRate.toFixed(2),
       normalEndTime,
+      periodStartDay: String(periodStartDay),
+      periodEndDay: String(periodEndDay),
     },
   });
 
-  async function onSubmit(values: { hourlyRate: string; normalEndTime: string }) {
+  const watchedStart = watch("periodStartDay");
+  const watchedEnd = watch("periodEndDay");
+  const previewStart = parsePeriodDay(watchedStart) ?? periodStartDay;
+  const previewEnd = parsePeriodDay(watchedEnd) ?? periodEndDay;
+  const previewRange = getOtPeriodRange(new Date(), previewStart, previewEnd);
+
+  async function onSubmit(values: {
+    hourlyRate: string;
+    normalEndTime: string;
+    periodStartDay: string;
+    periodEndDay: string;
+  }) {
     const nextRate = Number(values.hourlyRate);
     if (!Number.isFinite(nextRate) || nextRate < 0) {
       showToast("ค่า OT ต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0", "error");
       return;
     }
 
-    const previous = { hourlyRate, normalEndTime };
-    setLocal({ hourlyRate: nextRate, normalEndTime: values.normalEndTime });
+    const nextStart = parsePeriodDay(values.periodStartDay);
+    const nextEnd = parsePeriodDay(values.periodEndDay);
+    if (nextStart == null || nextEnd == null) {
+      showToast("วันที่เริ่มและสิ้นสุดต้องเป็นตัวเลข 1–31", "error");
+      return;
+    }
+
+    const previous = { hourlyRate, normalEndTime, periodStartDay, periodEndDay };
+    setLocal({
+      hourlyRate: nextRate,
+      normalEndTime: values.normalEndTime,
+      periodStartDay: nextStart,
+      periodEndDay: nextEnd,
+    });
 
     if (!online) {
       showToast("ออฟไลน์อยู่ ยังบันทึกไม่ได้", "error");
@@ -75,6 +109,8 @@ function OTSettingsCard() {
     const result = await updateSettingsAction({
       hourlyRate: nextRate,
       normalEndTime: values.normalEndTime,
+      periodStartDay: nextStart,
+      periodEndDay: nextEnd,
     });
 
     if (!result.ok) {
@@ -85,6 +121,11 @@ function OTSettingsCard() {
 
     hydrate(result.data);
     showToast("บันทึกการตั้งค่าแล้ว", "success");
+  }
+
+  function applyPreset(start: number, end: number) {
+    setValue("periodStartDay", String(start), { shouldDirty: true });
+    setValue("periodEndDay", String(end), { shouldDirty: true });
   }
 
   return (
@@ -106,6 +147,41 @@ function OTSettingsCard() {
           label="เวลาเลิกงานปกติ"
           {...register("normalEndTime")}
         />
+        <div>
+          <p className="mb-2 text-sm font-medium">รอบนับ OT</p>
+          <p className="mb-3 text-xs text-[var(--text-muted)]">
+            ถ้าวันเริ่มมากกว่าหรือเท่ากับวันสิ้นสุด จะนับจากเดือนก่อนหน้าถึงเดือนนี้ เช่น 26 ถึง 26 คือ 26 เดือนก่อน ถึง 26 เดือนนี้
+          </p>
+          <div className="mb-3 flex flex-wrap gap-2">
+            <Button type="button" variant="secondary" className="min-h-10 px-3 text-sm" onClick={() => applyPreset(26, 26)}>
+              รอบ 26–26
+            </Button>
+            <Button type="button" variant="secondary" className="min-h-10 px-3 text-sm" onClick={() => applyPreset(1, 31)}>
+              ปฏิทินเดือน 1–31
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              type="number"
+              min="1"
+              max="31"
+              inputMode="numeric"
+              label="วันเริ่ม"
+              {...register("periodStartDay")}
+            />
+            <Input
+              type="number"
+              min="1"
+              max="31"
+              inputMode="numeric"
+              label="วันสิ้นสุด"
+              {...register("periodEndDay")}
+            />
+          </div>
+          <p className="mt-2 text-xs text-[var(--text-muted)]">
+            ตัวอย่างรอบเดือนนี้: {formatPeriodRange(previewRange.start, previewRange.end)}
+          </p>
+        </div>
         <Button type="submit">บันทึก</Button>
       </form>
     </Card>
@@ -207,15 +283,15 @@ function ThemeSection() {
               <input
                 value={config.colors[item.key]}
                 onChange={(event) => updateColor(item.key, event.target.value)}
-                className="min-h-11 w-28 rounded-xl border border-[color-mix(in_srgb,var(--text)_14%,transparent)] bg-[var(--background)] px-2 font-mono text-sm"
+                className="min-h-11 w-28 rounded-xl border border-[color-mix(in_srgb,var(--text)_14%,transparent)] bg-[color-mix(in_srgb,var(--text)_8%,var(--surface))] px-2 font-mono text-sm text-[var(--text)]"
               />
             </span>
           </label>
         ))}
       </div>
 
-      <div className="mt-4 rounded-2xl bg-[var(--background)] p-4">
-        <p className="text-sm text-[var(--text-muted)]">ตัวอย่าง</p>
+      <div className="mt-4 rounded-2xl bg-[var(--background)] p-4 text-[var(--on-background)]">
+        <p className="text-sm text-[color-mix(in_srgb,var(--on-background)_72%,transparent)]">ตัวอย่าง</p>
         <p className="mt-1 text-lg font-semibold">OT Calculator</p>
         <p className="text-[var(--accent)]">฿225.00</p>
       </div>
@@ -343,7 +419,7 @@ function DataSection() {
       showToast(result.error, "error");
       return;
     }
-    hydrate({ hourlyRate: 75, normalEndTime: "17:00" });
+    hydrate({ hourlyRate: 75, normalEndTime: "17:00", periodStartDay: 26, periodEndDay: 26 });
     setSavedThemes([]);
     showToast("ลบข้อมูลทั้งหมดแล้ว", "success");
     window.location.reload();

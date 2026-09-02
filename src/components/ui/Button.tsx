@@ -8,9 +8,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANT_CLASS: Record<Variant, string> = {
   primary:
-    "bg-[var(--accent)] text-white shadow-[0_10px_20px_color-mix(in_srgb,var(--accent)_35%,transparent)] hover:opacity-90",
+    "bg-[var(--accent)] text-[var(--on-accent)] shadow-[0_10px_20px_color-mix(in_srgb,var(--accent)_35%,transparent)] hover:opacity-90",
   secondary:
-    "bg-[var(--surface)] text-[var(--text)] shadow-sm hover:opacity-90",
+    "border border-[color-mix(in_srgb,var(--text)_16%,transparent)] bg-[color-mix(in_srgb,var(--text)_8%,var(--surface))] text-[var(--text)] hover:opacity-90",
   ghost:
     "bg-[color-mix(in_srgb,var(--on-background)_12%,transparent)] text-[var(--on-background)] hover:bg-[color-mix(in_srgb,var(--on-background)_20%,transparent)]",
   danger: "bg-[#ef4444] text-white hover:bg-[#dc2626]",

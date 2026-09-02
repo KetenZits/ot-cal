@@ -21,7 +21,7 @@ export function ToastViewport() {
               toast.type === "error"
                 ? "bg-[#ef4444] text-white"
                 : toast.type === "success"
-                  ? "bg-[var(--accent)] text-white"
+                  ? "bg-[var(--accent)] text-[var(--on-accent)]"
                   : "bg-[var(--surface)] text-[var(--text)]"
             }`}
             onClick={() => dismissToast(toast.id)}

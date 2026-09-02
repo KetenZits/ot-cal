@@ -2,7 +2,7 @@ export function LogoMark({ size = "md" }: { size?: "sm" | "md" }) {
   const box = size === "sm" ? "h-8 w-8 text-[11px]" : "h-11 w-11 text-sm";
   return (
     <span
-      className={`inline-flex ${box} items-center justify-center rounded-2xl bg-[var(--accent)] font-bold tracking-tight text-white shadow-[0_8px_16px_color-mix(in_srgb,var(--accent)_35%,transparent)]`}
+      className={`inline-flex ${box} items-center justify-center rounded-2xl bg-[var(--accent)] font-bold tracking-tight text-[var(--on-accent)] shadow-[0_8px_16px_color-mix(in_srgb,var(--accent)_35%,transparent)]`}
       aria-hidden="true"
     >
       OT

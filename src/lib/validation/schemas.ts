@@ -21,6 +21,12 @@ export const hourlyRateSchema = z
   .finite()
   .min(0, "ค่า OT ต้องไม่ติดลบ");
 
+export const periodDaySchema = z
+  .number()
+  .int("วันที่ต้องเป็นจำนวนเต็ม")
+  .min(1, "วันที่ต้องอยู่ระหว่าง 1–31")
+  .max(31, "วันที่ต้องอยู่ระหว่าง 1–31");
+
 export const otMinutesSchema = z.number().int().min(0);
 export const otAmountSchema = z.number().finite().min(0);
 
@@ -43,9 +49,15 @@ export const settingsUpdateSchema = z
   .object({
     hourlyRate: hourlyRateSchema.optional(),
     normalEndTime: timeSchema.optional(),
+    periodStartDay: periodDaySchema.optional(),
+    periodEndDay: periodDaySchema.optional(),
   })
   .refine(
-    (value) => value.hourlyRate !== undefined || value.normalEndTime !== undefined,
+    (value) =>
+      value.hourlyRate !== undefined ||
+      value.normalEndTime !== undefined ||
+      value.periodStartDay !== undefined ||
+      value.periodEndDay !== undefined,
     { message: "ต้องระบุค่าที่ต้องการอัปเดต" },
   );
 
@@ -69,6 +81,8 @@ export const updateThemeSchema = z.object({
 export const settingsBackupSchema = z.object({
   hourlyRate: hourlyRateSchema,
   normalEndTime: timeSchema,
+  periodStartDay: periodDaySchema.optional().default(26),
+  periodEndDay: periodDaySchema.optional().default(26),
 });
 
 export const otRecordBackupSchema = z.object({

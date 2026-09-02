@@ -6,22 +6,26 @@ import type { DashboardPeriod, OTRecord } from "@/types/ot";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Card } from "@/components/ui/Card";
 import { ErrorState, EmptyState, Spinner } from "@/components/ui/States";
+import { Input } from "@/components/ui/Input";
 import { getOTRecordsByDateRangeAction } from "@/app/actions/ot";
 import {
-  getMonthRange,
+  formatPeriodRange,
+  getOtPeriodRange,
+  getOtYearRange,
   getWeekRange,
-  getYearRange,
+  parseDateKey,
   toDateKey,
 } from "@/utils/dateHelpers";
 import {
-  monthChartData,
+  periodChartData,
   summarizeRecords,
   weekChartData,
-  yearChartData,
+  yearPeriodChartData,
 } from "@/utils/dashboardAggregates";
 import { formatBaht, formatOTHours } from "@/utils/format";
 import { Banknote, CalendarCheck, Clock3 } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 const OTChart = dynamic(
   () => import("./OTChart").then((mod) => mod.OTChart),
@@ -33,8 +37,9 @@ const OTChart = dynamic(
 
 const PERIODS: Array<{ value: DashboardPeriod; label: string }> = [
   { value: "week", label: "สัปดาห์" },
-  { value: "month", label: "เดือน" },
+  { value: "month", label: "รอบเดือน" },
   { value: "year", label: "ปี" },
+  { value: "custom", label: "กำหนดเอง" },
 ];
 
 export function DashboardView() {
@@ -44,12 +49,28 @@ export function DashboardView() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [anchor] = useState(() => new Date());
+  const periodStartDay = useSettingsStore((state) => state.periodStartDay);
+  const periodEndDay = useSettingsStore((state) => state.periodEndDay);
+  const cycle = useMemo(
+    () => getOtPeriodRange(anchor, periodStartDay, periodEndDay),
+    [anchor, periodStartDay, periodEndDay],
+  );
+  const [customStart, setCustomStart] = useState(() => toDateKey(cycle.start));
+  const [customEnd, setCustomEnd] = useState(() => toDateKey(cycle.end));
 
   const range = useMemo(() => {
     if (period === "week") return getWeekRange(anchor);
-    if (period === "year") return getYearRange(anchor);
-    return getMonthRange(anchor);
-  }, [period, anchor]);
+    if (period === "year") return getOtYearRange(anchor, periodStartDay, periodEndDay);
+    if (period === "custom") {
+      const start = parseDateKey(customStart);
+      const end = parseDateKey(customEnd);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+        return cycle;
+      }
+      return customStart <= customEnd ? { start, end } : { start: end, end: start };
+    }
+    return cycle;
+  }, [period, anchor, cycle, customStart, customEnd, periodStartDay, periodEndDay]);
 
   const rangeKey = `${toDateKey(range.start)}:${toDateKey(range.end)}`;
   const loading = fetchedKey !== rangeKey && !error;
@@ -81,9 +102,11 @@ export function DashboardView() {
   const summary = useMemo(() => summarizeRecords(records), [records]);
   const chartData = useMemo(() => {
     if (period === "week") return weekChartData(records, range.start, range.end);
-    if (period === "year") return yearChartData(records, range.start);
-    return monthChartData(records, range.start, range.end);
-  }, [period, records, range.end, range.start]);
+    if (period === "year") {
+      return yearPeriodChartData(records, anchor, periodStartDay, periodEndDay);
+    }
+    return periodChartData(records, range.start, range.end);
+  }, [period, records, range.end, range.start, anchor, periodStartDay, periodEndDay]);
 
   function retry() {
     setError(null);
@@ -92,6 +115,10 @@ export function DashboardView() {
   }
 
   function changePeriod(next: DashboardPeriod) {
+    if (next === "custom") {
+      setCustomStart(toDateKey(cycle.start));
+      setCustomEnd(toDateKey(cycle.end));
+    }
     setError(null);
     setFetchedKey(null);
     setPeriod(next);
@@ -110,6 +137,35 @@ export function DashboardView() {
         options={PERIODS}
         onChange={changePeriod}
       />
+
+      {period === "custom" ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Input
+            type="date"
+            label="วันเริ่ม"
+            value={customStart}
+            onChange={(event) => {
+              setError(null);
+              setFetchedKey(null);
+              setCustomStart(event.target.value);
+            }}
+          />
+          <Input
+            type="date"
+            label="วันสิ้นสุด"
+            value={customEnd}
+            onChange={(event) => {
+              setError(null);
+              setFetchedKey(null);
+              setCustomEnd(event.target.value);
+            }}
+          />
+        </div>
+      ) : null}
+
+      <p className="text-sm text-[var(--text-muted)]">
+        {formatPeriodRange(range.start, range.end)}
+      </p>
 
       {loading ? <Spinner /> : null}
       {error ? <ErrorState message={error} onRetry={retry} /> : null}

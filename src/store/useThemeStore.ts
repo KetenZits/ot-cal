@@ -35,9 +35,22 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: "ot-theme",
-      version: 3,
+      version: 4,
       partialize: (state) => ({ config: state.config }),
-      migrate: () => ({ config: DEFAULT_THEME }),
+      migrate: (persisted) => {
+        const state = (persisted ?? {}) as { config?: ThemeConfig };
+        const config = state.config;
+        if (config?.mode === "preset" && config.presetId) {
+          const preset = getPresetById(config.presetId);
+          if (preset) {
+            return { config: preset.config };
+          }
+        }
+        if (config?.mode === "custom" && config.colors) {
+          return { config };
+        }
+        return { config: DEFAULT_THEME };
+      },
     },
   ),
 );

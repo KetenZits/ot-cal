@@ -6,12 +6,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { OTRecord } from "@/types/ot";
 import {
   formatMonthTitle,
+  formatPeriodRange,
   getCalendarDays,
   getCalendarGridRange,
+  getOtPeriodRange,
   isCurrentMonth,
+  isInInclusiveRange,
   isToday,
   shiftMonth,
   toDateKey,
+  unionDateRange,
 } from "@/utils/dateHelpers";
 import { formatBaht, formatCompactBaht, formatOTHours } from "@/utils/format";
 import { summarizeRecords } from "@/utils/dashboardAggregates";
@@ -22,6 +26,7 @@ import { Card } from "@/components/ui/Card";
 import { LogoMark, PageHeader } from "@/components/ui/PageHeader";
 import { DayEntrySheet } from "@/components/ot/DayEntrySheet";
 import { useUIStore } from "@/store/useUIStore";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 const WEEKDAYS = ["จ", "อ", "พ", "พฤ", "ศ", "ส", "อา"];
 
@@ -35,8 +40,17 @@ export function CalendarView() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [highlightKey, setHighlightKey] = useState<string | null>(null);
   const showToast = useUIStore((state) => state.showToast);
+  const periodStartDay = useSettingsStore((state) => state.periodStartDay);
+  const periodEndDay = useSettingsStore((state) => state.periodEndDay);
 
-  const range = useMemo(() => getCalendarGridRange(month), [month]);
+  const period = useMemo(
+    () => getOtPeriodRange(month, periodStartDay, periodEndDay),
+    [month, periodStartDay, periodEndDay],
+  );
+  const range = useMemo(
+    () => unionDateRange(getCalendarGridRange(month), period),
+    [month, period],
+  );
   const days = useMemo(() => getCalendarDays(month), [month]);
   const startDate = toDateKey(range.start);
   const endDate = toDateKey(range.end);
@@ -65,10 +79,14 @@ export function CalendarView() {
   }, [startDate, endDate, rangeKey, retryCount]);
 
   const monthKey = toDateKey(month).slice(0, 7);
+  const periodStartKey = toDateKey(period.start);
+  const periodEndKey = toDateKey(period.end);
   const monthSummary = useMemo(() => {
-    const list = [...records.values()].filter((record) => record.workDate.startsWith(monthKey));
+    const list = [...records.values()].filter(
+      (record) => record.workDate >= periodStartKey && record.workDate <= periodEndKey,
+    );
     return summarizeRecords(list);
-  }, [records, monthKey]);
+  }, [records, periodStartKey, periodEndKey]);
 
   function retry() {
     setError(null);
@@ -121,17 +139,21 @@ export function CalendarView() {
       </div>
 
       <div
-        className="mb-4 rounded-[28px] p-5 text-white shadow-[0_18px_36px_color-mix(in_srgb,var(--accent)_28%,transparent)]"
+        className="mb-4 rounded-[28px] p-5 text-[var(--on-accent)] shadow-[0_18px_36px_color-mix(in_srgb,var(--accent)_28%,transparent)]"
         style={{
-          background: "linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 55%, #ff3b6b) 100%)",
+          background:
+            "linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 72%, black) 100%)",
         }}
       >
-        <p className="text-sm text-white/80">เงิน OT เดือนนี้</p>
+        <p className="text-sm text-[color-mix(in_srgb,var(--on-accent)_80%,transparent)]">เงิน OT รอบนี้</p>
         <p className="mt-1 text-3xl font-semibold tracking-tight">
           {formatBaht(monthSummary.totalOTAmount)}
         </p>
-        <p className="mt-2 text-sm text-white/80">
+        <p className="mt-2 text-sm text-[color-mix(in_srgb,var(--on-accent)_80%,transparent)]">
           {formatOTHours(monthSummary.totalOTMinutes)} ชั่วโมง · {monthSummary.otDays} วัน
+        </p>
+        <p className="mt-2 text-xs text-[color-mix(in_srgb,var(--on-accent)_72%,transparent)]">
+          {formatPeriodRange(period.start, period.end)}
         </p>
       </div>
 
@@ -186,6 +208,7 @@ export function CalendarView() {
                     const key = toDateKey(day);
                     const record = records.get(key);
                     const inMonth = isCurrentMonth(day, month);
+                    const inPeriod = isInInclusiveRange(day, period.start, period.end);
                     const today = isToday(day);
                     const hasOT = Boolean(record && record.otMinutes > 0);
                     const highlighted = highlightKey === key;
@@ -205,17 +228,21 @@ export function CalendarView() {
                           if (highlighted) setHighlightKey(null);
                         }}
                         className={`flex min-h-[5.75rem] flex-col items-center justify-start rounded-[22px] px-2 py-2.5 text-left transition-colors ${
-                          inMonth ? "text-[var(--text)]" : "text-[var(--text-muted)] opacity-40"
+                          inPeriod ? "text-[var(--text)]" : "text-[var(--text-muted)] opacity-45"
                         } ${
                           hasOT
-                            ? "bg-[color-mix(in_srgb,var(--accent)_14%,white)]"
-                            : "bg-[color-mix(in_srgb,var(--text)_5%,var(--surface))]"
-                        } ${today ? "ring-2 ring-[var(--accent)]" : ""}`}
+                            ? "bg-[color-mix(in_srgb,var(--accent)_22%,var(--surface))]"
+                            : "bg-[color-mix(in_srgb,var(--text)_10%,var(--surface))]"
+                        } ${today ? "ring-2 ring-[var(--accent)]" : ""} ${
+                          !inMonth && inPeriod
+                            ? "ring-1 ring-[color-mix(in_srgb,var(--accent)_40%,transparent)]"
+                            : ""
+                        }`}
                         aria-label={`${key}${record ? `, OT ${formatCompactBaht(record.otAmount)}` : ""}`}
                       >
                         <span
                           className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold ${
-                            today ? "bg-[var(--accent)] text-white" : ""
+                            today ? "bg-[var(--accent)] text-[var(--on-accent)]" : ""
                           }`}
                         >
                           {day.getDate()}
@@ -238,7 +265,7 @@ export function CalendarView() {
           </div>
         )}
         <p className="mt-3 text-center text-xs text-[var(--text-muted)]">
-          เลื่อนตารางไปทางขวาได้ ถ้าช่องวันที่แคบเกินไป
+          วันที่จางอยู่นอกรอบนับ OT · เลื่อนตารางไปทางขวาได้ถ้าช่องแคบเกินไป
         </p>
       </Card>
 

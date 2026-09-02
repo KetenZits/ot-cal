@@ -22,6 +22,10 @@ function luminance(hex: string): number {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
 
+function contrastInk(hex: string): string {
+  return luminance(hex) > 0.55 ? "#16161F" : "#FFFFFF";
+}
+
 export function applyThemeToDocument(config: ThemeConfig): void {
   const root = document.documentElement;
   (Object.keys(CSS_VARS) as Array<keyof ThemeConfig["colors"]>).forEach((key) => {
@@ -29,10 +33,11 @@ export function applyThemeToDocument(config: ThemeConfig): void {
   });
   const lightHero = luminance(config.colors.background) > 0.62;
   root.style.setProperty("--on-background", lightHero ? config.colors.text : "#FFFFFF");
+  root.style.setProperty("--on-accent", contrastInk(config.colors.accent));
   root.style.setProperty("--theme-color", config.colors.background);
 }
 
-export const THEME_INIT_SCRIPT = `(function(){try{var raw=localStorage.getItem('ot-theme');var colors=null;if(raw){var parsed=JSON.parse(raw);var config=(parsed.state&&parsed.state.config)||parsed;colors=config.colors;}if(!colors){colors={background:'#5B4BFF',surface:'#FFFFFF',primary:'#1C1C28',accent:'#FF6B57',text:'#1C1C28',textMuted:'#7B8194'};}var hex=/^#[0-9A-Fa-f]{6}$/;var map={background:'--background',surface:'--surface',primary:'--primary',accent:'--accent',text:'--text',textMuted:'--text-muted'};var root=document.documentElement;Object.keys(map).forEach(function(key){var value=colors[key];if(hex.test(value))root.style.setProperty(map[key],value);});var bg=(colors.background||'#000000').replace('#','');if(bg.length===6){var r=parseInt(bg.slice(0,2),16),g=parseInt(bg.slice(2,4),16),b=parseInt(bg.slice(4,6),16);var lum=(0.299*r+0.587*g+0.114*b)/255;root.style.setProperty('--on-background',lum>0.62?(colors.text||'#1C1C28'):'#FFFFFF');}}catch(e){}})();`;
+export const THEME_INIT_SCRIPT = `(function(){try{var raw=localStorage.getItem('ot-theme');var colors=null;if(raw){var parsed=JSON.parse(raw);var config=(parsed.state&&parsed.state.config)||parsed;colors=config.colors;}if(!colors){colors={background:'#4F3DFF',surface:'#F5F3FF',primary:'#16161F',accent:'#FF5A45',text:'#16161F',textMuted:'#5C6378'};}var hex=/^#[0-9A-Fa-f]{6}$/;var map={background:'--background',surface:'--surface',primary:'--primary',accent:'--accent',text:'--text',textMuted:'--text-muted'};var root=document.documentElement;Object.keys(map).forEach(function(key){var value=colors[key];if(hex.test(value))root.style.setProperty(map[key],value);});function lum(c){var h=(c||'#000000').replace('#','');if(h.length!==6)return 0;var r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return(0.299*r+0.587*g+0.114*b)/255;}root.style.setProperty('--on-background',lum(colors.background)>0.62?(colors.text||'#16161F'):'#FFFFFF');root.style.setProperty('--on-accent',lum(colors.accent)>0.55?'#16161F':'#FFFFFF');}catch(e){}})();`;
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const config = useThemeStore((state) => state.config);

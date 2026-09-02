@@ -40,6 +40,8 @@ export async function importDataAction(
     await updateSettings({
       hourlyRate: parsed.data.settings.hourlyRate,
       normalEndTime: parsed.data.settings.normalEndTime,
+      periodStartDay: parsed.data.settings.periodStartDay,
+      periodEndDay: parsed.data.settings.periodEndDay,
     });
     await replaceAllOTRecords(parsed.data.otRecords);
     await replaceAllThemes(parsed.data.savedThemes);

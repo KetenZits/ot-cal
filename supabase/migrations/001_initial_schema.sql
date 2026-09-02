@@ -36,9 +36,13 @@ create table public.app_settings (
   id integer primary key default 1,
   hourly_rate numeric(10, 2) not null default 75,
   normal_end_time time not null default '17:00',
+  period_start_day integer not null default 26,
+  period_end_day integer not null default 26,
   updated_at timestamptz not null default now(),
   constraint app_settings_single_row check (id = 1),
-  constraint app_settings_hourly_rate_nonnegative check (hourly_rate >= 0)
+  constraint app_settings_hourly_rate_nonnegative check (hourly_rate >= 0),
+  constraint app_settings_period_start_day_range check (period_start_day between 1 and 31),
+  constraint app_settings_period_end_day_range check (period_end_day between 1 and 31)
 );
 
 create trigger app_settings_set_updated_at
