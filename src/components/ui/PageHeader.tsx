@@ -2,7 +2,7 @@ export function LogoMark({ size = "md" }: { size?: "sm" | "md" }) {
   const box = size === "sm" ? "h-8 w-8 text-[11px]" : "h-11 w-11 text-sm";
   return (
     <span
-      className={`inline-flex ${box} items-center justify-center rounded-2xl bg-[var(--accent)] font-bold tracking-tight text-[var(--on-accent)] shadow-[0_8px_16px_color-mix(in_srgb,var(--accent)_35%,transparent)]`}
+      className={`ui-chip inline-flex ${box} items-center justify-center bg-[var(--accent)] font-bold tracking-tight text-[var(--on-accent)]`}
       aria-hidden="true"
     >
       OT
@@ -28,7 +28,7 @@ export function PageHeader({
           {eyebrow}
         </p>
       ) : null}
-      <h1 className="mt-1 text-[1.75rem] leading-tight font-semibold tracking-tight">{title}</h1>
+      <h1 className="ui-title mt-1 text-[1.75rem] leading-tight">{title}</h1>
       {subtitle ? (
         <p className="mt-1.5 text-sm leading-6 text-[color-mix(in_srgb,var(--on-background)_72%,transparent)]">{subtitle}</p>
       ) : null}

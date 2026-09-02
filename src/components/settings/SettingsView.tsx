@@ -17,6 +17,7 @@ import {
   importDataAction,
 } from "@/app/actions/data";
 import { THEME_COLOR_KEYS, THEME_PRESETS } from "@/theme/presets";
+import { UI_STYLES } from "@/theme/uiStyles";
 import { applyThemeToDocument } from "@/theme/themeProvider";
 import { deleteThemeAction, saveThemeAction } from "@/app/actions/themes";
 import { downloadJson, parseBackupJson } from "@/utils/exportImport";
@@ -28,11 +29,11 @@ import { formatPeriodRange, getOtPeriodRange } from "@/utils/dateHelpers";
 
 export function SettingsView() {
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
+    <div className="ui-scene mx-auto flex w-full max-w-lg flex-col gap-4">
       <PageHeader
         eyebrow="Settings"
         title="ตั้งค่า"
-        subtitle="อัตรา OT รอบนับ เวลาเลิกงานปกติ ธีม และการสำรองข้อมูล"
+        subtitle="อัตรา OT รอบนับ เวลาเลิกงานปกติ ธีม UI และการสำรองข้อมูล"
       />
       <OTSettingsCard />
       <ThemeSection />
@@ -192,6 +193,7 @@ function ThemeSection() {
   const config = useThemeStore((state) => state.config);
   const setConfig = useThemeStore((state) => state.setConfig);
   const applyPreset = useThemeStore((state) => state.applyPreset);
+  const applyUiStyle = useThemeStore((state) => state.applyUiStyle);
   const savedThemes = useThemeStore((state) => state.savedThemes);
   const addSavedTheme = useThemeStore((state) => state.addSavedTheme);
   const removeSavedTheme = useThemeStore((state) => state.removeSavedTheme);
@@ -199,10 +201,12 @@ function ThemeSection() {
   const [themeName, setThemeName] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const activeUi = config.uiStyleId ?? "modern";
 
   function updateColor(key: keyof ThemeColors, value: string) {
     const next: ThemeConfig = {
       mode: "custom",
+      uiStyleId: config.uiStyleId,
       colors: { ...config.colors, [key]: value },
     };
     setConfig(next);
@@ -218,7 +222,11 @@ function ThemeSection() {
     setSaving(true);
     const result = await saveThemeAction({
       name,
-      config: { mode: "custom", colors: config.colors },
+      config: {
+        mode: "custom",
+        uiStyleId: config.uiStyleId,
+        colors: config.colors,
+      },
     });
     setSaving(false);
     if (!result.ok) {
@@ -246,25 +254,61 @@ function ThemeSection() {
   return (
     <Card>
       <h2 className="mb-1 text-lg font-semibold">ธีม</h2>
-      <p className="mb-4 text-sm text-[var(--text-muted)]">เลือกโทนสี หรือปรับเองแล้วบันทึกไว้ใช้ซ้ำ</p>
+      <p className="mb-4 text-sm text-[var(--text-muted)]">
+        เลือกโทนสีกับสไตล์ UI ได้แยกกัน หรือปรับสีเองแล้วบันทึกไว้ใช้ซ้ำ
+      </p>
+
+      <h3 className="mb-3 font-medium">สไตล์ UI</h3>
+      <div className="mb-6 grid grid-cols-2 gap-2">
+        {UI_STYLES.map((style) => {
+          const selected = activeUi === style.id;
+          return (
+            <button
+              key={style.id}
+              type="button"
+              onClick={() => applyUiStyle(style.id)}
+              className={`ui-picker min-h-16 px-3 py-2.5 text-left ${
+                selected ? "ring-2 ring-[var(--accent)]" : ""
+              }`}
+            >
+              <span className="style-thumb" data-thumb={style.id} aria-hidden="true">
+                <span className="style-thumb-card" />
+                <span className="style-thumb-bar" />
+              </span>
+              <span className="block text-sm font-semibold">{style.name}</span>
+              <span className="mt-0.5 block text-[11px] text-[var(--text-muted)]">{style.hint}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <h3 className="mb-3 font-medium">โทนสี</h3>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {THEME_PRESETS.map((preset) => (
-          <button
-            key={preset.id}
-            type="button"
-            onClick={() => {
-              applyPreset(preset.id);
-              applyThemeToDocument(preset.config);
-            }}
-            className="min-h-11 rounded-xl border border-[color-mix(in_srgb,var(--text)_12%,transparent)] px-3 text-left text-sm"
-          >
-            <span
-              className="mb-2 mt-2 block h-3 w-full rounded-full"
-              style={{ background: preset.config.colors.accent }}
-            />
-            {preset.name}
-          </button>
-        ))}
+        {THEME_PRESETS.map((preset) => {
+          const selected = config.mode === "preset" && config.presetId === preset.id;
+          return (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => {
+                applyPreset(preset.id);
+                applyThemeToDocument({ ...preset.config, uiStyleId: config.uiStyleId });
+              }}
+              className={`ui-picker min-h-11 px-3 text-left text-sm ${
+                selected ? "ring-2 ring-[var(--accent)]" : ""
+              }`}
+            >
+              <span
+                className="mb-2 mt-2 block h-3 w-full"
+                style={{
+                  background: preset.config.colors.accent,
+                  borderRadius: "var(--radius-button)",
+                }}
+              />
+              {preset.name}
+            </button>
+          );
+        })}
       </div>
 
       <h3 className="mt-6 mb-3 font-medium">ปรับสีเอง</h3>

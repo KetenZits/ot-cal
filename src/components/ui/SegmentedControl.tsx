@@ -19,10 +19,8 @@ export function SegmentedControl<T extends string>({
     <div
       role="tablist"
       aria-label={label}
-      className={`grid bg-[var(--surface)] p-1 text-[var(--text)] shadow-[0_12px_30px_rgba(28,20,80,0.12)] ${
-        many
-          ? "grid-cols-2 gap-1 rounded-[24px] sm:grid-cols-4 sm:gap-0 sm:rounded-full"
-          : "grid-cols-3 rounded-full"
+      className={`ui-nav grid p-1 ${
+        many ? "grid-cols-2 gap-1 sm:grid-cols-4 sm:gap-0" : "grid-cols-3"
       }`}
     >
       {options.map((option) => {
@@ -33,9 +31,9 @@ export function SegmentedControl<T extends string>({
             type="button"
             role="tab"
             aria-selected={selected}
-            className={`min-h-11 rounded-full px-1 text-sm font-semibold transition-colors ${
+            className={`ui-button min-h-11 px-1 text-sm ${
               selected
-                ? "bg-[var(--accent)] text-[var(--on-accent)]"
+                ? "ui-button-primary bg-[var(--accent)] text-[var(--on-accent)]"
                 : "text-[var(--text-muted)]"
             }`}
             onClick={() => onChange(option.value)}

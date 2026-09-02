@@ -6,9 +6,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section
-      className={`rounded-[28px] bg-[var(--surface)] p-4 text-[var(--text)] shadow-[0_18px_40px_rgba(28,20,80,0.12)] ${className}`}
-    >
+    <section className={`ui-surface rounded-[var(--radius-card)] p-4 ${className}`}>
       {children}
     </section>
   );

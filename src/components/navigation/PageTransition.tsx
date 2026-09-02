@@ -14,7 +14,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.18 }}
-        className="min-w-0 overflow-x-hidden"
+        className="ui-page min-w-0"
       >
         {children}
       </motion.div>

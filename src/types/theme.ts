@@ -1,3 +1,13 @@
+export type UiStyleId =
+  | "street"
+  | "modern"
+  | "luxury"
+  | "glass"
+  | "neubrutalism"
+  | "immersive"
+  | "minimal"
+  | "flat";
+
 export interface ThemeColors {
   background: string;
   surface: string;
@@ -10,6 +20,7 @@ export interface ThemeColors {
 export interface ThemeConfig {
   mode: "preset" | "custom";
   presetId?: string;
+  uiStyleId?: UiStyleId;
   colors: ThemeColors;
 }
 

@@ -45,7 +45,7 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
             role="dialog"
             aria-modal="true"
             aria-labelledby="sheet-title"
-            className="relative z-10 max-h-[92dvh] w-full overflow-y-auto rounded-t-[32px] bg-[var(--surface)] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-[var(--text)] shadow-2xl md:max-w-md md:rounded-[32px]"
+            className="ui-surface relative z-10 max-h-[92dvh] w-full overflow-y-auto rounded-t-[var(--radius-sheet)] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] md:max-w-md md:rounded-[var(--radius-sheet)]"
             initial={{ y: "100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
@@ -58,7 +58,7 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-[color-mix(in_srgb,var(--text)_8%,transparent)]"
+                className="ui-button inline-flex h-11 w-11 items-center justify-center hover:bg-[color-mix(in_srgb,var(--text)_8%,transparent)]"
                 aria-label="ปิดหน้าต่าง"
               >
                 <X size={20} />

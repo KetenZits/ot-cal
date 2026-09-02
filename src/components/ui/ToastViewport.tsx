@@ -17,7 +17,7 @@ export function ToastViewport() {
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
-            className={`pointer-events-auto rounded-xl px-4 py-3 text-left text-sm shadow-lg ${
+            className={`ui-control pointer-events-auto px-4 py-3 text-left text-sm ${
               toast.type === "error"
                 ? "bg-[#ef4444] text-white"
                 : toast.type === "success"

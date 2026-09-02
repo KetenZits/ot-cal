@@ -13,6 +13,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     config: {
       mode: "preset",
       presetId: "vivid",
+      uiStyleId: "modern",
       colors: {
         background: "#4F3DFF",
         surface: "#F5F3FF",

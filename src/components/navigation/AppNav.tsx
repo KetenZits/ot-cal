@@ -17,7 +17,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="หลัก"
-      className="fixed inset-x-3 bottom-3 z-40 rounded-full bg-[var(--surface)] text-[var(--text)] shadow-[0_12px_30px_rgba(28,20,80,0.18)] md:hidden"
+      className="ui-nav fixed inset-x-3 bottom-3 z-40 md:hidden"
       style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="grid grid-cols-3 px-2">
@@ -37,9 +37,10 @@ export function BottomNav() {
                 aria-current={active ? "page" : undefined}
               >
                 <span
-                  className={`flex h-8 w-12 items-center justify-center rounded-full ${
+                  className={`flex h-8 w-12 items-center justify-center ${
                     active ? "bg-[color-mix(in_srgb,var(--accent)_14%,transparent)]" : ""
                   }`}
+                  style={{ borderRadius: "var(--radius-button)" }}
                 >
                   <Icon size={20} aria-hidden="true" />
                 </span>
@@ -80,7 +81,7 @@ export function SideNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`mb-1 flex min-h-11 items-center gap-3 rounded-full px-3 text-sm font-medium ${
+            className={`ui-button mb-1 flex min-h-11 items-center gap-3 px-3 text-sm font-medium ${
               active
                 ? "bg-[var(--surface)] text-[var(--text)] shadow-sm"
                 : "text-[color-mix(in_srgb,var(--on-background)_75%,transparent)] hover:bg-[color-mix(in_srgb,var(--on-background)_10%,transparent)]"

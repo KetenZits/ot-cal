@@ -17,8 +17,8 @@ export function EmptyState({
   hint?: string;
 }) {
   return (
-    <div className="flex flex-col items-center rounded-[28px] bg-[var(--surface)] px-5 py-12 text-center text-[var(--text)]">
-      <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--accent)_12%,transparent)]">
+    <div className="ui-surface flex flex-col items-center rounded-[var(--radius-card)] px-5 py-12 text-center">
+      <span className="ui-chip mb-3 flex h-12 w-12 items-center justify-center bg-[color-mix(in_srgb,var(--accent)_12%,transparent)]">
         <Clock3 size={22} aria-hidden="true" />
       </span>
       <p className="font-medium">{message}</p>
@@ -35,7 +35,7 @@ export function ErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-3xl bg-[var(--surface)] px-4 py-10 text-center">
+    <div className="ui-surface flex flex-col items-center gap-3 rounded-[var(--radius-card)] px-4 py-10 text-center">
       <p className="text-sm text-[var(--text-muted)]">{message}</p>
       {onRetry ? (
         <button

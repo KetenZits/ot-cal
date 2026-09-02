@@ -125,7 +125,7 @@ export function CalendarView() {
   const selectedRecord = selectedDate ? (records.get(selectedDate) ?? null) : null;
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-lg">
+    <div className="ui-scene mx-auto w-full min-w-0 max-w-lg">
       <div className="mb-5 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <LogoMark />
@@ -138,21 +138,15 @@ export function CalendarView() {
         </div>
       </div>
 
-      <div
-        className="mb-4 rounded-[28px] p-5 text-[var(--on-accent)] shadow-[0_18px_36px_color-mix(in_srgb,var(--accent)_28%,transparent)]"
-        style={{
-          background:
-            "linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 72%, black) 100%)",
-        }}
-      >
-        <p className="text-sm text-[color-mix(in_srgb,var(--on-accent)_80%,transparent)]">เงิน OT รอบนี้</p>
-        <p className="mt-1 text-3xl font-semibold tracking-tight">
+      <div className="ui-banner mb-4 p-5">
+        <p className="ui-banner-kicker text-sm">เงิน OT รอบนี้</p>
+        <p className="ui-banner-value mt-1 text-3xl font-semibold">
           {formatBaht(monthSummary.totalOTAmount)}
         </p>
-        <p className="mt-2 text-sm text-[color-mix(in_srgb,var(--on-accent)_80%,transparent)]">
+        <p className="ui-banner-meta mt-2 text-sm">
           {formatOTHours(monthSummary.totalOTMinutes)} ชั่วโมง · {monthSummary.otDays} วัน
         </p>
-        <p className="mt-2 text-xs text-[color-mix(in_srgb,var(--on-accent)_72%,transparent)]">
+        <p className="ui-banner-meta mt-2 text-xs">
           {formatPeriodRange(period.start, period.end)}
         </p>
       </div>
@@ -179,7 +173,7 @@ export function CalendarView() {
         </Button>
       </div>
 
-      <Card className="min-w-0 overflow-hidden p-4">
+      <Card className="min-w-0 p-4">
         {loading ? (
           <Spinner />
         ) : error ? (
@@ -227,7 +221,7 @@ export function CalendarView() {
                         onAnimationComplete={() => {
                           if (highlighted) setHighlightKey(null);
                         }}
-                        className={`flex min-h-[5.75rem] flex-col items-center justify-start rounded-[22px] px-2 py-2.5 text-left transition-colors ${
+                        className={`ui-day flex min-h-[5.75rem] flex-col items-center justify-start px-2 py-2.5 text-left transition-colors ${
                           inPeriod ? "text-[var(--text)]" : "text-[var(--text-muted)] opacity-45"
                         } ${
                           hasOT
@@ -241,9 +235,10 @@ export function CalendarView() {
                         aria-label={`${key}${record ? `, OT ${formatCompactBaht(record.otAmount)}` : ""}`}
                       >
                         <span
-                          className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold ${
+                          className={`flex h-7 w-7 items-center justify-center text-sm font-semibold ${
                             today ? "bg-[var(--accent)] text-[var(--on-accent)]" : ""
                           }`}
+                          style={{ borderRadius: "var(--radius-button)" }}
                         >
                           {day.getDate()}
                         </span>

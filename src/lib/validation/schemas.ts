@@ -42,6 +42,19 @@ export const themeColorsSchema = z.object({
 export const themeConfigSchema = z.object({
   mode: z.enum(["preset", "custom"]),
   presetId: z.string().optional(),
+  uiStyleId: z
+    .enum([
+      "street",
+      "modern",
+      "luxury",
+      "glass",
+      "neubrutalism",
+      "immersive",
+      "minimal",
+      "flat",
+    ])
+    .optional()
+    .default("modern"),
   colors: themeColorsSchema,
 });
 

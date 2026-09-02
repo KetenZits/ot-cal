@@ -9,6 +9,274 @@
   --text-muted: #5c6378;
   --on-background: #ffffff;
   --on-accent: #ffffff;
+  --radius-card: 28px;
+  --radius-button: 999px;
+  --radius-control: 16px;
+  --radius-day: 22px;
+  --radius-nav: 999px;
+  --radius-chip: 16px;
+  --radius-sheet: 32px;
+  --border-width: 0px;
+  --border-color: transparent;
+  --surface-fill: var(--surface);
+  --surface-blur: 0px;
+  --surface-saturate: 100%;
+  --shadow-card: 0 18px 40px rgba(28, 20, 80, 0.12);
+  --shadow-button: 0 10px 20px color-mix(in srgb, var(--accent) 35%, transparent);
+  --shadow-nav: 0 12px 30px rgba(28, 20, 80, 0.18);
+  --shadow-day: none;
+  --shadow-banner: 0 18px 36px color-mix(in srgb, var(--accent) 28%, transparent);
+  --button-border: 0 solid transparent;
+  --input-border: 0 solid transparent;
+  --day-border: 0 solid transparent;
+  --banner-border: 0 solid transparent;
+  --chip-border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  --ui-tracking: 0em;
+  --ui-title-tracking: -0.02em;
+  --ui-title-weight: 600;
+  --ui-transform: none;
+  --ui-weight: 600;
+  --banner-fill: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 72%, black) 100%);
+  --banner-ink: var(--on-accent);
+  --banner-muted: color-mix(in srgb, var(--on-accent) 78%, transparent);
+  --card-transform: none;
+  --banner-transform: none;
+  --grain-opacity: 0;
+  --scene-extra: none;
+  --body-overlay:
+    radial-gradient(ellipse 90% 55% at 110% -10%, color-mix(in srgb, white 28%, var(--background)), transparent 55%),
+    radial-gradient(ellipse 70% 45% at -15% 110%, color-mix(in srgb, black 22%, var(--background)), transparent 50%);
+}
+
+html[data-ui="modern"] {
+  --radius-card: 28px;
+  --radius-button: 999px;
+  --radius-control: 16px;
+  --radius-day: 22px;
+  --radius-nav: 999px;
+  --radius-chip: 16px;
+  --radius-sheet: 32px;
+  --shadow-card: 0 22px 50px rgba(20, 12, 60, 0.16);
+}
+
+html[data-ui="street"] {
+  --radius-card: 14px;
+  --radius-button: 6px;
+  --radius-control: 6px;
+  --radius-day: 8px;
+  --radius-nav: 10px;
+  --radius-chip: 6px;
+  --radius-sheet: 14px;
+  --border-width: 3px;
+  --border-color: #111;
+  --shadow-card: 10px 10px 0 var(--accent), 18px 18px 0 #111;
+  --shadow-button: 5px 5px 0 #111;
+  --shadow-nav: 8px 8px 0 #111;
+  --shadow-day: 3px 3px 0 #111;
+  --shadow-banner: 12px 12px 0 #111;
+  --button-border: 3px solid #111;
+  --input-border: 3px solid #111;
+  --day-border: 2px solid #111;
+  --banner-border: 3px solid #111;
+  --chip-border: 3px solid #111;
+  --ui-tracking: 0.08em;
+  --ui-title-tracking: 0.01em;
+  --ui-title-weight: 900;
+  --ui-transform: uppercase;
+  --ui-weight: 800;
+  --card-transform: rotate(-1.15deg);
+  --banner-transform: rotate(1.25deg);
+  --grain-opacity: 0.18;
+  --banner-fill: repeating-linear-gradient(
+      -18deg,
+      color-mix(in srgb, var(--accent) 88%, black) 0 10px,
+      var(--accent) 10px 20px
+    );
+  --body-overlay:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 22%),
+    radial-gradient(circle at 88% 12%, #111 0 8%, transparent 9%),
+    radial-gradient(circle at 80% 78%, color-mix(in srgb, var(--accent) 40%, transparent), transparent 18%),
+    repeating-linear-gradient(-24deg, color-mix(in srgb, #111 18%, transparent) 0 6px, transparent 6px 16px);
+}
+
+html[data-ui="luxury"] {
+  --radius-card: 4px;
+  --radius-button: 999px;
+  --radius-control: 2px;
+  --radius-day: 2px;
+  --radius-nav: 4px;
+  --radius-chip: 2px;
+  --radius-sheet: 6px;
+  --border-width: 1px;
+  --border-color: color-mix(in srgb, #d4af37 70%, white);
+  --shadow-card: 0 40px 80px rgba(0, 0, 0, 0.28);
+  --shadow-button: 0 12px 30px rgba(0, 0, 0, 0.22);
+  --shadow-nav: 0 24px 50px rgba(0, 0, 0, 0.28);
+  --shadow-banner: 0 30px 60px rgba(0, 0, 0, 0.35);
+  --banner-border: 1px solid #d4af37;
+  --chip-border: 1px solid #d4af37;
+  --ui-tracking: 0.18em;
+  --ui-title-tracking: 0.22em;
+  --ui-title-weight: 400;
+  --ui-transform: uppercase;
+  --ui-weight: 500;
+  --grain-opacity: 0.12;
+  --banner-fill: linear-gradient(165deg, #16120c 0%, #090807 55%, #1c160e 100%);
+  --banner-ink: #f5e6c8;
+  --banner-muted: color-mix(in srgb, #f5e6c8 70%, transparent);
+  --body-overlay:
+    radial-gradient(ellipse 70% 40% at 50% -8%, color-mix(in srgb, #d4af37 28%, transparent), transparent 60%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.18), transparent 30%);
+}
+
+html[data-ui="glass"] {
+  --radius-card: 28px;
+  --radius-button: 999px;
+  --radius-control: 20px;
+  --radius-day: 22px;
+  --radius-nav: 30px;
+  --radius-chip: 18px;
+  --radius-sheet: 30px;
+  --border-width: 1px;
+  --border-color: color-mix(in srgb, white 55%, transparent);
+  --surface-fill: color-mix(in srgb, var(--surface) 38%, transparent);
+  --surface-blur: 28px;
+  --surface-saturate: 180%;
+  --shadow-card: 0 24px 60px rgba(0, 0, 0, 0.18), inset 0 1px 0 color-mix(in srgb, white 55%, transparent);
+  --shadow-nav: 0 18px 50px rgba(0, 0, 0, 0.2), inset 0 1px 0 color-mix(in srgb, white 45%, transparent);
+  --shadow-day: inset 0 1px 0 color-mix(in srgb, white 40%, transparent);
+  --shadow-banner: 0 20px 50px color-mix(in srgb, var(--accent) 30%, transparent);
+  --banner-border: 1px solid color-mix(in srgb, white 40%, transparent);
+  --banner-fill: linear-gradient(145deg, color-mix(in srgb, var(--accent) 48%, transparent), color-mix(in srgb, var(--accent) 22%, transparent));
+  --grain-opacity: 0.08;
+  --body-overlay:
+    radial-gradient(circle at 15% 10%, color-mix(in srgb, white 45%, transparent), transparent 28%),
+    radial-gradient(circle at 85% 18%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 32%),
+    radial-gradient(circle at 50% 90%, color-mix(in srgb, white 20%, transparent), transparent 36%);
+}
+
+html[data-ui="neubrutalism"] {
+  --radius-card: 0px;
+  --radius-button: 0px;
+  --radius-control: 0px;
+  --radius-day: 0px;
+  --radius-nav: 0px;
+  --radius-chip: 0px;
+  --radius-sheet: 0px;
+  --border-width: 4px;
+  --border-color: #111;
+  --shadow-card: 12px 12px 0 #111;
+  --shadow-button: 6px 6px 0 #111;
+  --shadow-nav: 8px 8px 0 #111;
+  --shadow-day: 4px 4px 0 #111;
+  --shadow-banner: 12px 12px 0 #111;
+  --button-border: 4px solid #111;
+  --input-border: 4px solid #111;
+  --day-border: 3px solid #111;
+  --banner-border: 4px solid #111;
+  --chip-border: 4px solid #111;
+  --ui-title-weight: 900;
+  --ui-weight: 800;
+  --ui-tracking: 0.04em;
+  --ui-title-tracking: 0;
+  --ui-transform: uppercase;
+  --card-transform: rotate(-0.7deg);
+  --banner-transform: rotate(0.8deg);
+  --banner-fill: var(--accent);
+  --body-overlay:
+    radial-gradient(circle, color-mix(in srgb, #111 18%, transparent) 1.4px, transparent 1.6px);
+  --scene-extra: repeating-linear-gradient(0deg, transparent 0 22px, color-mix(in srgb, #111 6%, transparent) 22px 23px),
+    repeating-linear-gradient(90deg, transparent 0 22px, color-mix(in srgb, #111 6%, transparent) 22px 23px);
+}
+
+html[data-ui="immersive"] {
+  --radius-card: 24px;
+  --radius-button: 18px;
+  --radius-control: 16px;
+  --radius-day: 16px;
+  --radius-nav: 24px;
+  --radius-chip: 16px;
+  --radius-sheet: 28px;
+  --border-width: 1px;
+  --border-color: color-mix(in srgb, white 22%, transparent);
+  --shadow-card:
+    0 2px 0 color-mix(in srgb, white 40%, transparent) inset,
+    0 -18px 36px rgba(0, 0, 0, 0.28) inset,
+    0 30px 50px rgba(0, 0, 0, 0.38),
+    0 0 40px color-mix(in srgb, var(--accent) 22%, transparent);
+  --shadow-button:
+    0 2px 0 color-mix(in srgb, white 45%, transparent) inset,
+    0 -6px 0 color-mix(in srgb, black 28%, var(--accent)) inset,
+    0 16px 28px rgba(0, 0, 0, 0.35);
+  --shadow-nav:
+    0 2px 0 color-mix(in srgb, white 28%, transparent) inset,
+    0 24px 40px rgba(0, 0, 0, 0.4);
+  --shadow-day:
+    0 2px 0 color-mix(in srgb, white 30%, transparent) inset,
+    0 10px 18px rgba(0, 0, 0, 0.22);
+  --shadow-banner:
+    0 2px 0 color-mix(in srgb, white 35%, transparent) inset,
+    0 28px 50px color-mix(in srgb, var(--accent) 40%, transparent);
+  --card-transform: none;
+  --banner-transform: none;
+  --grain-opacity: 0.1;
+  --body-overlay:
+    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in srgb, var(--accent) 45%, transparent), transparent 58%),
+    radial-gradient(circle at 100% 100%, rgba(0, 0, 0, 0.55), transparent 46%),
+    radial-gradient(circle at 0% 80%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 32%);
+}
+
+html[data-ui="minimal"] {
+  --radius-card: 0px;
+  --radius-button: 0px;
+  --radius-control: 0px;
+  --radius-day: 0px;
+  --radius-nav: 0px;
+  --radius-chip: 0px;
+  --radius-sheet: 0px;
+  --border-width: 0px;
+  --border-color: transparent;
+  --surface-fill: transparent;
+  --shadow-card: none;
+  --shadow-button: none;
+  --shadow-nav: none;
+  --shadow-day: none;
+  --shadow-banner: none;
+  --input-border: 0 solid transparent;
+  --day-border: 0 solid transparent;
+  --banner-border: 0 solid transparent;
+  --chip-border: 0 solid transparent;
+  --ui-title-weight: 400;
+  --ui-title-tracking: -0.04em;
+  --ui-weight: 500;
+  --banner-fill: transparent;
+  --banner-ink: var(--on-background);
+  --banner-muted: color-mix(in srgb, var(--on-background) 62%, transparent);
+  --body-overlay: none;
+}
+
+html[data-ui="flat"] {
+  --radius-card: 0px;
+  --radius-button: 0px;
+  --radius-control: 0px;
+  --radius-day: 0px;
+  --radius-nav: 0px;
+  --radius-chip: 0px;
+  --radius-sheet: 0px;
+  --border-width: 0px;
+  --border-color: transparent;
+  --shadow-card: none;
+  --shadow-button: none;
+  --shadow-nav: none;
+  --shadow-day: none;
+  --shadow-banner: none;
+  --input-border: 2px solid var(--text);
+  --day-border: 0 solid transparent;
+  --banner-border: 0 solid transparent;
+  --chip-border: 0 solid transparent;
+  --ui-weight: 700;
+  --banner-fill: var(--accent);
+  --body-overlay: none;
 }
 
 @theme inline {
@@ -38,14 +306,406 @@ html {
 
 body {
   font-family: var(--font-kanit), ui-sans-serif, system-ui, sans-serif;
-  background-image:
-    radial-gradient(ellipse 90% 55% at 110% -10%, color-mix(in srgb, white 28%, var(--background)), transparent 55%),
-    radial-gradient(ellipse 70% 45% at -15% 110%, color-mix(in srgb, black 22%, var(--background)), transparent 50%);
+  background-image: var(--body-overlay);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--scene-extra);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+.ui-app {
+  position: relative;
+  z-index: 1;
+}
+
+.ui-page {
+  min-width: 0;
+}
+
+html[data-ui="immersive"] .ui-page {
+  overflow: visible;
+}
+
+.ui-surface {
+  position: relative;
+  background: var(--surface-fill);
+  color: var(--text);
+  border: var(--border-width) solid var(--border-color);
+  box-shadow: var(--shadow-card);
+  transform: var(--card-transform);
+  backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
+  -webkit-backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
+}
+
+.ui-nav {
+  background: var(--surface-fill);
+  color: var(--text);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-nav);
+  box-shadow: var(--shadow-nav);
+  backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
+  -webkit-backdrop-filter: blur(var(--surface-blur)) saturate(var(--surface-saturate));
+}
+
+.ui-button {
+  border-radius: var(--radius-button);
+  font-weight: var(--ui-weight);
+  letter-spacing: var(--ui-tracking);
+  text-transform: var(--ui-transform);
+}
+
+.ui-button-primary {
+  box-shadow: var(--shadow-button);
+  border: var(--button-border);
+}
+
+.ui-control {
+  border-radius: var(--radius-control);
+  border: var(--input-border);
+}
+
+.ui-picker {
+  border-radius: var(--radius-control);
+  border: var(--chip-border);
+  background: color-mix(in srgb, var(--text) 5%, var(--surface));
+}
+
+.ui-day {
+  border-radius: var(--radius-day);
+  border: var(--day-border);
+  box-shadow: var(--shadow-day);
+}
+
+.ui-banner {
+  position: relative;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-banner);
+  border: var(--banner-border);
+  background: var(--banner-fill);
+  color: var(--banner-ink);
+  transform: var(--banner-transform);
+  backdrop-filter: blur(var(--surface-blur));
+  -webkit-backdrop-filter: blur(var(--surface-blur));
+}
+
+.ui-banner-kicker,
+.ui-banner-meta {
+  color: var(--banner-muted);
+}
+
+.ui-banner-value {
+  color: var(--banner-ink);
+}
+
+.ui-chip {
+  border-radius: var(--radius-chip);
+  box-shadow: var(--shadow-button);
+  border: var(--button-border);
+}
+
+.ui-title {
+  letter-spacing: var(--ui-title-tracking);
+  font-weight: var(--ui-title-weight);
+  text-transform: var(--ui-transform);
+}
+
+html[data-ui="glass"] .ui-surface,
+html[data-ui="glass"] .ui-banner {
+  overflow: hidden;
+}
+
+html[data-ui="street"] .ui-surface,
+html[data-ui="street"] .ui-banner,
+html[data-ui="neubrutalism"] .ui-surface,
+html[data-ui="neubrutalism"] .ui-banner,
+html[data-ui="luxury"] .ui-surface,
+html[data-ui="luxury"] .ui-banner,
+html[data-ui="luxury"] .ui-nav {
+  overflow: visible;
+}
+
+html[data-ui="street"] .ui-surface::before,
+html[data-ui="street"] .ui-banner::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 22px;
+  width: 78px;
+  height: 20px;
+  background: color-mix(in srgb, var(--accent) 70%, white);
+  box-shadow: 0 1px 0 #111;
+  transform: rotate(-9deg);
+  z-index: 3;
+  pointer-events: none;
+}
+
+html[data-ui="street"] .ui-banner::after {
+  content: "OT";
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  font-size: 64px;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  opacity: 0.16;
+  pointer-events: none;
+  line-height: 1;
+}
+
+html[data-ui="street"] .ui-nav {
+  transform: rotate(-0.6deg);
+}
+
+html[data-ui="luxury"] .ui-surface,
+html[data-ui="luxury"] .ui-banner,
+html[data-ui="luxury"] .ui-nav {
+  outline: 1px solid color-mix(in srgb, #d4af37 80%, white);
+  outline-offset: 5px;
+}
+
+html[data-ui="luxury"] .ui-title {
+  font-size: 1.45rem;
+}
+
+html[data-ui="luxury"] header p:first-child {
+  color: #d4af37;
+}
+
+html[data-ui="glass"] .ui-surface::after,
+html[data-ui="glass"] .ui-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 25%, color-mix(in srgb, white 34%, transparent) 48%, transparent 70%);
+  transform: translateX(-40%);
+  animation: ui-sheen 7s ease-in-out infinite;
+}
+
+html[data-ui="glass"] .ui-day {
+  backdrop-filter: blur(12px);
+}
+
+html[data-ui="neubrutalism"] .ui-button-primary:active,
+html[data-ui="street"] .ui-button-primary:active {
+  transform: translate(5px, 5px);
+  box-shadow: 0 0 0 #111;
+}
+
+html[data-ui="neubrutalism"] .ui-banner-value {
+  text-shadow: none;
+  letter-spacing: 0.02em;
+  font-weight: 800;
+}
+
+html[data-ui="street"] .ui-scene,
+html[data-ui="neubrutalism"] .ui-scene {
+  padding-bottom: 1rem;
+}
+
+html[data-ui="luxury"] .ui-scene {
+  padding-inline: 6px;
+}
+
+html[data-ui="immersive"] .ui-scene {
+  padding: 10px 8px 28px;
+}
+
+html[data-ui="immersive"] .ui-app-main {
+  overflow: visible;
+}
+
+html[data-ui="immersive"] .ui-day:hover {
+  transform: translateY(-4px) scale(1.03);
+}
+
+html[data-ui="minimal"] .ui-surface,
+html[data-ui="minimal"] .ui-nav {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+
+html[data-ui="minimal"] .ui-banner {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+html[data-ui="minimal"] .ui-banner-value {
+  font-size: 2.6rem;
+  font-weight: 400;
+}
+
+html[data-ui="minimal"] .ui-nav {
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  border-radius: 0;
+  border-top: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  background: color-mix(in srgb, var(--background) 88%, transparent);
+  margin-bottom: 0 !important;
+}
+
+html[data-ui="minimal"] .ui-day {
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+html[data-ui="flat"] .ui-surface {
+  background: var(--surface);
+}
+
+html[data-ui="flat"] .ui-day {
+  box-shadow: none;
+}
+
+html[data-ui="flat"] .ui-banner-value {
+  font-weight: 800;
+}
+
+.style-thumb {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 34px;
+  margin-bottom: 8px;
+}
+
+.style-thumb-card,
+.style-thumb-bar {
+  display: block;
+  background: var(--accent);
+}
+
+.style-thumb-card {
+  width: 42px;
+  height: 26px;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
+}
+
+.style-thumb-bar {
+  width: 18px;
+  height: 18px;
+}
+
+[data-thumb="street"] .style-thumb-card {
+  border: 3px solid #111;
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 var(--accent);
+  transform: rotate(-8deg);
+}
+
+[data-thumb="street"] .style-thumb-bar {
+  border-radius: 4px;
+  border: 2px solid #111;
+  transform: rotate(6deg);
+}
+
+[data-thumb="modern"] .style-thumb-card,
+[data-thumb="modern"] .style-thumb-bar {
+  border-radius: 999px;
+  box-shadow: 0 8px 12px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+[data-thumb="luxury"] .style-thumb-card {
+  border-radius: 2px;
+  outline: 1px solid #d4af37;
+  outline-offset: 2px;
+  border-color: #d4af37;
+}
+
+[data-thumb="luxury"] .style-thumb-bar {
+  border-radius: 999px;
+  background: #d4af37;
+}
+
+[data-thumb="glass"] .style-thumb-card {
+  border-radius: 12px;
+  background: color-mix(in srgb, white 35%, transparent);
+  border-color: color-mix(in srgb, white 50%, transparent);
+  box-shadow: inset 0 1px 0 white;
+}
+
+[data-thumb="glass"] .style-thumb-bar {
+  border-radius: 999px;
+  opacity: 0.7;
+}
+
+[data-thumb="neubrutalism"] .style-thumb-card,
+[data-thumb="neubrutalism"] .style-thumb-bar {
+  border-radius: 0;
+  border: 3px solid #111;
+  box-shadow: 5px 5px 0 #111;
+}
+
+[data-thumb="immersive"] .style-thumb-card {
+  border-radius: 10px;
+  transform: perspective(80px) rotateX(18deg);
+  box-shadow: 0 10px 14px rgba(0, 0, 0, 0.28);
+}
+
+[data-thumb="immersive"] .style-thumb-bar {
+  border-radius: 8px;
+  box-shadow: 0 6px 0 color-mix(in srgb, black 25%, var(--accent));
+}
+
+[data-thumb="minimal"] .style-thumb-card {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--text);
+  border-radius: 0;
+  height: 18px;
+}
+
+[data-thumb="minimal"] .style-thumb-bar {
+  width: 22px;
+  height: 2px;
+  border-radius: 0;
+}
+
+[data-thumb="flat"] .style-thumb-card,
+[data-thumb="flat"] .style-thumb-bar {
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+@keyframes ui-sheen {
+  0%,
+  55% {
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(50%);
+    opacity: 0;
+  }
 }
 
 .calendar-scroll {

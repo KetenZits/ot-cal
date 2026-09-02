@@ -31,7 +31,7 @@ const OTChart = dynamic(
   () => import("./OTChart").then((mod) => mod.OTChart),
   {
     ssr: false,
-    loading: () => <div className="h-60 animate-pulse rounded-2xl bg-[var(--surface)]" />,
+    loading: () => <div className="h-60 animate-pulse rounded-[var(--radius-card)] bg-[var(--surface)]" />,
   },
 );
 
@@ -125,7 +125,7 @@ export function DashboardView() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+    <div className="ui-scene mx-auto flex w-full max-w-3xl flex-col gap-4">
       <PageHeader
         eyebrow="Dashboard"
         title="สรุป OT"

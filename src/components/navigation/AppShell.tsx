@@ -56,11 +56,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [hydrateSettings, setSavedThemes, showToast]);
 
   return (
-    <div className="min-h-dvh max-w-full overflow-x-hidden bg-[var(--background)] text-[var(--on-background)]">
+    <div className="ui-app min-h-dvh max-w-full overflow-x-hidden bg-[var(--background)] text-[var(--on-background)]">
       <OfflineBanner />
       <div className="mx-auto flex min-h-dvh w-full max-w-6xl">
         <SideNav />
-        <main className="relative min-w-0 flex-1 overflow-x-hidden px-4 pb-[calc(6.25rem+env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:px-8 md:pb-8 md:pt-8">
+        <main className="ui-app-main relative min-w-0 flex-1 overflow-x-hidden px-4 pb-[calc(6.25rem+env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:px-8 md:pb-8 md:pt-8">
           <PageTransition>{children}</PageTransition>
         </main>
       </div>

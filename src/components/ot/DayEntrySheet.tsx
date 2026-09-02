@@ -103,7 +103,7 @@ export function DayEntrySheet({
 
           <div>
             <p className="text-sm text-[var(--text-muted)]">OT ที่คำนวณได้</p>
-            <div className="mt-2 rounded-[24px] bg-[color-mix(in_srgb,var(--text)_5%,var(--surface))] px-4 py-4">
+            <div className="ui-control mt-2 bg-[color-mix(in_srgb,var(--text)_5%,var(--surface))] px-4 py-4">
               <p className="text-3xl font-semibold tracking-tight">
                 {formatOTDuration(preview.otMinutes)}
               </p>

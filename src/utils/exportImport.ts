@@ -3,6 +3,7 @@ import { backupSchema } from "@/lib/validation/schemas";
 import type { AppSettings } from "@/types/settings";
 import type { OTRecord } from "@/types/ot";
 import type { SavedTheme } from "@/types/theme";
+import { DEFAULT_UI_STYLE_ID, isUiStyleId } from "@/theme/uiStyles";
 
 export function buildBackupPayload(
   settings: AppSettings,
@@ -27,7 +28,12 @@ export function buildBackupPayload(
     })),
     savedThemes: savedThemes.map((theme) => ({
       name: theme.name,
-      config: theme.config,
+      config: {
+        ...theme.config,
+        uiStyleId: isUiStyleId(theme.config.uiStyleId)
+          ? theme.config.uiStyleId
+          : DEFAULT_UI_STYLE_ID,
+      },
     })),
   };
 }
