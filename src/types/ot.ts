@@ -1,9 +1,12 @@
+export type DayKind = "ot" | "off" | "absent";
+
 export interface OTRecord {
   id: number;
   workDate: string;
   endTime: string;
   otMinutes: number;
   otAmount: number;
+  dayKind: DayKind;
   note: string | null;
   createdAt: string;
   updatedAt: string;
@@ -11,7 +14,8 @@ export interface OTRecord {
 
 export interface OTRecordInput {
   workDate: string;
-  endTime: string;
+  endTime?: string;
+  dayKind?: DayKind;
   note?: string | null;
 }
 
@@ -25,6 +29,8 @@ export interface OTPeriodSummary {
   totalOTHours: number;
   totalOTAmount: number;
   otDays: number;
+  offDays: number;
+  absentDays: number;
 }
 
 export type DashboardPeriod = "week" | "month" | "year" | "custom";
@@ -34,3 +40,16 @@ export interface ChartPoint {
   label: string;
   amount: number;
 }
+
+export function getDayKind(record: Pick<OTRecord, "dayKind"> | null | undefined): DayKind {
+  if (record?.dayKind === "off" || record?.dayKind === "absent") {
+    return record.dayKind;
+  }
+  return "ot";
+}
+
+export const DAY_KIND_LABEL: Record<DayKind, string> = {
+  ot: "OT",
+  off: "หยุด",
+  absent: "ไม่มา",
+};

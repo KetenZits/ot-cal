@@ -42,6 +42,7 @@ export async function importDataAction(
       normalEndTime: parsed.data.settings.normalEndTime,
       periodStartDay: parsed.data.settings.periodStartDay,
       periodEndDay: parsed.data.settings.periodEndDay,
+      cycleGoalAmount: parsed.data.settings.cycleGoalAmount,
     });
     await replaceAllOTRecords(parsed.data.otRecords);
     await replaceAllThemes(parsed.data.savedThemes);

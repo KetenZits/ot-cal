@@ -17,6 +17,7 @@ export interface Database {
           ot_minutes: number;
           ot_amount: string;
           note: string | null;
+          day_kind: string;
           created_at: string;
           updated_at: string;
         };
@@ -27,6 +28,7 @@ export interface Database {
           ot_minutes: number;
           ot_amount: number | string;
           note?: string | null;
+          day_kind?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -36,6 +38,7 @@ export interface Database {
           ot_minutes?: number;
           ot_amount?: number | string;
           note?: string | null;
+          day_kind?: string;
           updated_at?: string;
         };
         Relationships: [];
@@ -47,6 +50,7 @@ export interface Database {
           normal_end_time: string;
           period_start_day: number;
           period_end_day: number;
+          cycle_goal_amount: string;
           updated_at: string;
         };
         Insert: {
@@ -55,6 +59,7 @@ export interface Database {
           normal_end_time?: string;
           period_start_day?: number;
           period_end_day?: number;
+          cycle_goal_amount?: number | string;
           updated_at?: string;
         };
         Update: {
@@ -62,6 +67,7 @@ export interface Database {
           normal_end_time?: string;
           period_start_day?: number;
           period_end_day?: number;
+          cycle_goal_amount?: number | string;
           updated_at?: string;
         };
         Relationships: [];

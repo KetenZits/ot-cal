@@ -29,6 +29,11 @@ export const periodDaySchema = z
 
 export const otMinutesSchema = z.number().int().min(0);
 export const otAmountSchema = z.number().finite().min(0);
+export const dayKindSchema = z.enum(["ot", "off", "absent"]);
+export const cycleGoalAmountSchema = z
+  .number()
+  .finite()
+  .min(0, "เป้าหมายต้องไม่ติดลบ");
 
 export const themeColorsSchema = z.object({
   background: hexColorSchema,
@@ -64,21 +69,29 @@ export const settingsUpdateSchema = z
     normalEndTime: timeSchema.optional(),
     periodStartDay: periodDaySchema.optional(),
     periodEndDay: periodDaySchema.optional(),
+    cycleGoalAmount: cycleGoalAmountSchema.optional(),
   })
   .refine(
     (value) =>
       value.hourlyRate !== undefined ||
       value.normalEndTime !== undefined ||
       value.periodStartDay !== undefined ||
-      value.periodEndDay !== undefined,
+      value.periodEndDay !== undefined ||
+      value.cycleGoalAmount !== undefined,
     { message: "ต้องระบุค่าที่ต้องการอัปเดต" },
   );
 
-export const otUpsertSchema = z.object({
-  workDate: dateKeySchema,
-  endTime: timeSchema,
-  note: z.string().max(500).nullable().optional(),
-});
+export const otUpsertSchema = z
+  .object({
+    workDate: dateKeySchema,
+    dayKind: dayKindSchema.optional().default("ot"),
+    endTime: timeSchema.optional(),
+    note: z.string().max(500).nullable().optional(),
+  })
+  .refine((value) => value.dayKind !== "ot" || Boolean(value.endTime), {
+    message: "กรุณาใส่เวลาเลิกงาน",
+    path: ["endTime"],
+  });
 
 export const saveThemeSchema = z.object({
   name: z.string().trim().min(1, "กรุณาตั้งชื่อธีม").max(60),
@@ -96,6 +109,7 @@ export const settingsBackupSchema = z.object({
   normalEndTime: timeSchema,
   periodStartDay: periodDaySchema.optional().default(26),
   periodEndDay: periodDaySchema.optional().default(26),
+  cycleGoalAmount: cycleGoalAmountSchema.optional().default(0),
 });
 
 export const otRecordBackupSchema = z.object({
@@ -103,6 +117,7 @@ export const otRecordBackupSchema = z.object({
   endTime: timeSchema,
   otMinutes: otMinutesSchema,
   otAmount: otAmountSchema,
+  dayKind: dayKindSchema.optional().default("ot"),
   note: z.string().nullable().optional(),
 });
 

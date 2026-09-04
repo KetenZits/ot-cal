@@ -74,6 +74,7 @@ export async function saveOTRecordAction(input: unknown): Promise<ActionResult<O
     const record = await upsertOTRecord({
       workDate: parsed.data.workDate,
       endTime: parsed.data.endTime,
+      dayKind: parsed.data.dayKind,
       note: parsed.data.note,
       hourlyRate: settings.hourlyRate,
       normalEndTime: settings.normalEndTime,

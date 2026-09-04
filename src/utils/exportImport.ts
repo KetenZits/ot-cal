@@ -18,12 +18,14 @@ export function buildBackupPayload(
       normalEndTime: settings.normalEndTime,
       periodStartDay: settings.periodStartDay,
       periodEndDay: settings.periodEndDay,
+      cycleGoalAmount: settings.cycleGoalAmount,
     },
     otRecords: otRecords.map((record) => ({
       workDate: record.workDate,
       endTime: record.endTime,
       otMinutes: record.otMinutes,
       otAmount: record.otAmount,
+      dayKind: record.dayKind,
       note: record.note,
     })),
     savedThemes: savedThemes.map((theme) => ({

@@ -4,6 +4,7 @@ export interface AppSettings {
   normalEndTime: string;
   periodStartDay: number;
   periodEndDay: number;
+  cycleGoalAmount: number;
   updatedAt: string;
 }
 
@@ -12,4 +13,5 @@ export interface SettingsUpdate {
   normalEndTime?: string;
   periodStartDay?: number;
   periodEndDay?: number;
+  cycleGoalAmount?: number;
 }

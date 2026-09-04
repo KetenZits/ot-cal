@@ -25,6 +25,7 @@ import {
 import { formatBaht, formatOTHours } from "@/utils/format";
 import { Banknote, CalendarCheck, Clock3 } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { GoalProgress } from "@/components/ot/GoalProgress";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
 const OTChart = dynamic(
@@ -51,6 +52,8 @@ export function DashboardView() {
   const [anchor] = useState(() => new Date());
   const periodStartDay = useSettingsStore((state) => state.periodStartDay);
   const periodEndDay = useSettingsStore((state) => state.periodEndDay);
+  const cycleGoalAmount = useSettingsStore((state) => state.cycleGoalAmount);
+  const hourlyRate = useSettingsStore((state) => state.hourlyRate);
   const cycle = useMemo(
     () => getOtPeriodRange(anchor, periodStartDay, periodEndDay),
     [anchor, periodStartDay, periodEndDay],
@@ -190,6 +193,25 @@ export function DashboardView() {
               value={`${summary.otDays} วัน`}
             />
           </div>
+
+          {summary.offDays > 0 || summary.absentDays > 0 ? (
+            <p className="text-sm text-[var(--text-muted)]">
+              {summary.offDays > 0 ? `หยุด ${summary.offDays} วัน` : null}
+              {summary.offDays > 0 && summary.absentDays > 0 ? " · " : null}
+              {summary.absentDays > 0 ? `ไม่มา ${summary.absentDays} วัน` : null}
+            </p>
+          ) : null}
+
+          {period === "month" && cycleGoalAmount > 0 ? (
+            <Card>
+              <p className="text-sm font-medium">เป้าหมายรอบนี้</p>
+              <GoalProgress
+                current={summary.totalOTAmount}
+                goal={cycleGoalAmount}
+                hourlyRate={hourlyRate}
+              />
+            </Card>
+          ) : null}
 
           {records.length === 0 ? (
             <EmptyState />

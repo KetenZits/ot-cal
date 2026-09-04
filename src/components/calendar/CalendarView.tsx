@@ -25,8 +25,10 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { LogoMark, PageHeader } from "@/components/ui/PageHeader";
 import { DayEntrySheet } from "@/components/ot/DayEntrySheet";
+import { GoalProgress } from "@/components/ot/GoalProgress";
 import { useUIStore } from "@/store/useUIStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
+import { DAY_KIND_LABEL, getDayKind, type DayKind } from "@/types/ot";
 
 const WEEKDAYS = ["จ", "อ", "พ", "พฤ", "ศ", "ส", "อา"];
 
@@ -42,6 +44,8 @@ export function CalendarView() {
   const showToast = useUIStore((state) => state.showToast);
   const periodStartDay = useSettingsStore((state) => state.periodStartDay);
   const periodEndDay = useSettingsStore((state) => state.periodEndDay);
+  const cycleGoalAmount = useSettingsStore((state) => state.cycleGoalAmount);
+  const hourlyRate = useSettingsStore((state) => state.hourlyRate);
 
   const period = useMemo(
     () => getOtPeriodRange(month, periodStartDay, periodEndDay),
@@ -133,7 +137,7 @@ export function CalendarView() {
             className="mb-0"
             eyebrow="OT Calculator"
             title={formatMonthTitle(month)}
-            subtitle="แตะวันที่เพื่อบันทึกเวลาเลิกงาน"
+            subtitle="แตะวันที่เพื่อบันทึก OT วันหยุด หรือไม่มา"
           />
         </div>
       </div>
@@ -144,11 +148,19 @@ export function CalendarView() {
           {formatBaht(monthSummary.totalOTAmount)}
         </p>
         <p className="ui-banner-meta mt-2 text-sm">
-          {formatOTHours(monthSummary.totalOTMinutes)} ชั่วโมง · {monthSummary.otDays} วัน
+          {formatOTHours(monthSummary.totalOTMinutes)} ชั่วโมง · {monthSummary.otDays} วัน OT
+          {monthSummary.offDays > 0 ? ` · หยุด ${monthSummary.offDays}` : ""}
+          {monthSummary.absentDays > 0 ? ` · ไม่มา ${monthSummary.absentDays}` : ""}
         </p>
         <p className="ui-banner-meta mt-2 text-xs">
           {formatPeriodRange(period.start, period.end)}
         </p>
+        <GoalProgress
+          current={monthSummary.totalOTAmount}
+          goal={cycleGoalAmount}
+          hourlyRate={hourlyRate}
+          variant="banner"
+        />
       </div>
 
       <div className="mb-4 flex items-center justify-between gap-2">
@@ -204,7 +216,8 @@ export function CalendarView() {
                     const inMonth = isCurrentMonth(day, month);
                     const inPeriod = isInInclusiveRange(day, period.start, period.end);
                     const today = isToday(day);
-                    const hasOT = Boolean(record && record.otMinutes > 0);
+                    const hasOT = Boolean(record && getDayKind(record) === "ot" && record.otMinutes > 0);
+                    const dayKind = record ? getDayKind(record) : null;
                     const highlighted = highlightKey === key;
 
                     return (
@@ -223,16 +236,12 @@ export function CalendarView() {
                         }}
                         className={`ui-day flex min-h-[5.75rem] flex-col items-center justify-start px-2 py-2.5 text-left transition-colors ${
                           inPeriod ? "text-[var(--text)]" : "text-[var(--text-muted)] opacity-45"
-                        } ${
-                          hasOT
-                            ? "bg-[color-mix(in_srgb,var(--accent)_22%,var(--surface))]"
-                            : "bg-[color-mix(in_srgb,var(--text)_10%,var(--surface))]"
-                        } ${today ? "ring-2 ring-[var(--accent)]" : ""} ${
+                        } ${dayCellClass(dayKind, hasOT)} ${today ? "ring-2 ring-[var(--accent)]" : ""} ${
                           !inMonth && inPeriod
                             ? "ring-1 ring-[color-mix(in_srgb,var(--accent)_40%,transparent)]"
                             : ""
                         }`}
-                        aria-label={`${key}${record ? `, OT ${formatCompactBaht(record.otAmount)}` : ""}`}
+                        aria-label={dayAriaLabel(key, dayKind, record?.otAmount ?? 0)}
                       >
                         <span
                           className={`flex h-7 w-7 items-center justify-center text-sm font-semibold ${
@@ -246,9 +255,13 @@ export function CalendarView() {
                           <motion.span
                             initial={{ opacity: 0, y: 4 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="mt-2 text-[11px] font-semibold text-[var(--accent)]"
+                            className={`mt-2 text-[11px] font-semibold ${
+                              dayKind === "ot" ? "text-[var(--accent)]" : "text-[var(--text-muted)]"
+                            }`}
                           >
-                            {formatCompactBaht(record.otAmount)}
+                            {dayKind === "ot"
+                              ? formatCompactBaht(record.otAmount)
+                              : DAY_KIND_LABEL[dayKind ?? "ot"]}
                           </motion.span>
                         ) : null}
                       </motion.button>
@@ -260,7 +273,7 @@ export function CalendarView() {
           </div>
         )}
         <p className="mt-3 text-center text-xs text-[var(--text-muted)]">
-          วันที่จางอยู่นอกรอบนับ OT · เลื่อนตารางไปทางขวาได้ถ้าช่องแคบเกินไป
+          จาง = นอกรอบนับ · สีเน้น = OT · เทา = หยุด · เข้ม = ไม่มา
         </p>
       </Card>
 
@@ -274,4 +287,24 @@ export function CalendarView() {
       />
     </div>
   );
+}
+
+function dayCellClass(kind: DayKind | null, hasOT: boolean): string {
+  if (kind === "off") {
+    return "bg-[color-mix(in_srgb,var(--text-muted)_30%,var(--surface))]";
+  }
+  if (kind === "absent") {
+    return "bg-[color-mix(in_srgb,var(--primary)_22%,var(--surface))]";
+  }
+  if (hasOT) {
+    return "bg-[color-mix(in_srgb,var(--accent)_22%,var(--surface))]";
+  }
+  return "bg-[color-mix(in_srgb,var(--text)_10%,var(--surface))]";
+}
+
+function dayAriaLabel(dateKey: string, kind: DayKind | null, amount: number): string {
+  if (kind === "off") return `${dateKey}, วันหยุด`;
+  if (kind === "absent") return `${dateKey}, ไม่มา`;
+  if (kind === "ot") return `${dateKey}, OT ${formatCompactBaht(amount)}`;
+  return dateKey;
 }

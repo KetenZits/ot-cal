@@ -18,10 +18,12 @@ create table public.ot_records (
   ot_minutes integer not null default 0,
   ot_amount numeric(10, 2) not null default 0,
   note text,
+  day_kind text not null default 'ot',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint ot_records_ot_minutes_nonnegative check (ot_minutes >= 0),
-  constraint ot_records_ot_amount_nonnegative check (ot_amount >= 0)
+  constraint ot_records_ot_amount_nonnegative check (ot_amount >= 0),
+  constraint ot_records_day_kind_valid check (day_kind in ('ot', 'off', 'absent'))
 );
 
 -- work_date is unique, so lookups are already indexed.
@@ -38,11 +40,13 @@ create table public.app_settings (
   normal_end_time time not null default '17:00',
   period_start_day integer not null default 26,
   period_end_day integer not null default 26,
+  cycle_goal_amount numeric(10, 2) not null default 0,
   updated_at timestamptz not null default now(),
   constraint app_settings_single_row check (id = 1),
   constraint app_settings_hourly_rate_nonnegative check (hourly_rate >= 0),
   constraint app_settings_period_start_day_range check (period_start_day between 1 and 31),
-  constraint app_settings_period_end_day_range check (period_end_day between 1 and 31)
+  constraint app_settings_period_end_day_range check (period_end_day between 1 and 31),
+  constraint app_settings_cycle_goal_nonnegative check (cycle_goal_amount >= 0)
 );
 
 create trigger app_settings_set_updated_at

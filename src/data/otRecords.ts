@@ -4,55 +4,91 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { calculateOT } from "@/utils/otCalculator";
 import { normalizeTime } from "@/utils/dateHelpers";
 import { parseNumeric } from "@/utils/format";
-import type { OTRecord } from "@/types/ot";
+import { getDayKind, type DayKind, type OTRecord } from "@/types/ot";
 import type { Database } from "@/types/database";
 
 type OTRecordRow = Database["public"]["Tables"]["ot_records"]["Row"];
+type OTRecordRowLike = Omit<OTRecordRow, "day_kind"> & {
+  day_kind?: string | null;
+};
 
-function mapRecord(row: OTRecordRow): OTRecord {
+const MARKER_END_TIME = "00:00";
+const DAY_KIND_MIGRATION_ERROR =
+  "ยังไม่ได้เพิ่มคอลัมน์ประเภทวันในฐานข้อมูล กรุณารันไฟล์ supabase/migrations/003_goal_and_day_kind.sql ใน SQL Editor ของ Supabase";
+
+function isMissingDayKindColumn(error: { message?: string; code?: string } | null): boolean {
+  if (!error?.message) return false;
+  const msg = error.message.toLowerCase();
+  return (
+    error.code === "42703" ||
+    error.code === "PGRST204" ||
+    msg.includes("day_kind") ||
+    msg.includes("schema cache") ||
+    msg.includes("could not find")
+  );
+}
+
+function mapRecord(row: OTRecordRowLike): OTRecord {
+  const dayKind: DayKind =
+    row.day_kind === "off" || row.day_kind === "absent" ? row.day_kind : "ot";
+
   return {
     id: row.id,
     workDate: row.work_date,
     endTime: normalizeTime(row.end_time),
     otMinutes: row.ot_minutes,
     otAmount: parseNumeric(row.ot_amount),
+    dayKind,
     note: row.note,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
-export async function createOTRecord(input: {
+type UpsertInput = {
   workDate: string;
-  endTime: string;
+  endTime?: string;
+  dayKind?: DayKind;
   hourlyRate: number;
   normalEndTime: string;
   note?: string | null;
-}): Promise<OTRecord> {
+};
+
+type OTRecordInsert = Database["public"]["Tables"]["ot_records"]["Insert"];
+
+function buildUpsertPayload(input: UpsertInput): OTRecordInsert {
+  const dayKind = input.dayKind ?? "ot";
+  const note = input.note ?? null;
+
+  if (dayKind !== "ot") {
+    return {
+      work_date: input.workDate,
+      end_time: MARKER_END_TIME,
+      ot_minutes: 0,
+      ot_amount: "0.00",
+      note,
+      day_kind: dayKind,
+    };
+  }
+
   const { otMinutes, otAmount } = calculateOT({
     normalEndTime: input.normalEndTime,
-    actualEndTime: input.endTime,
+    actualEndTime: input.endTime ?? input.normalEndTime,
     hourlyRate: input.hourlyRate,
   });
 
-  const supabase = createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from("ot_records")
-    .insert({
-      work_date: input.workDate,
-      end_time: input.endTime,
-      ot_minutes: otMinutes,
-      ot_amount: otAmount.toFixed(2),
-      note: input.note ?? null,
-    })
-    .select()
-    .single();
+  return {
+    work_date: input.workDate,
+    end_time: input.endTime ?? input.normalEndTime,
+    ot_minutes: otMinutes,
+    ot_amount: otAmount.toFixed(2),
+    note,
+    day_kind: "ot",
+  };
+}
 
-  if (error || !data) {
-    throw new Error(error?.message ?? "Failed to create OT record");
-  }
-
-  return mapRecord(data);
+export async function createOTRecord(input: UpsertInput): Promise<OTRecord> {
+  return upsertOTRecord(input);
 }
 
 export async function getOTRecordByDate(workDate: string): Promise<OTRecord | null> {
@@ -103,67 +139,37 @@ export async function getAllOTRecords(): Promise<OTRecord[]> {
   return (data ?? []).map(mapRecord);
 }
 
-export async function updateOTRecord(input: {
-  workDate: string;
-  endTime: string;
-  hourlyRate: number;
-  normalEndTime: string;
-  note?: string | null;
-}): Promise<OTRecord> {
-  const { otMinutes, otAmount } = calculateOT({
-    normalEndTime: input.normalEndTime,
-    actualEndTime: input.endTime,
-    hourlyRate: input.hourlyRate,
-  });
-
-  const supabase = createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from("ot_records")
-    .update({
-      end_time: input.endTime,
-      ot_minutes: otMinutes,
-      ot_amount: otAmount.toFixed(2),
-      note: input.note ?? null,
-    })
-    .eq("work_date", input.workDate)
-    .select()
-    .single();
-
-  if (error || !data) {
-    throw new Error(error?.message ?? "Failed to update OT record");
-  }
-
-  return mapRecord(data);
+export async function updateOTRecord(input: UpsertInput): Promise<OTRecord> {
+  return upsertOTRecord(input);
 }
 
-export async function upsertOTRecord(input: {
-  workDate: string;
-  endTime: string;
-  hourlyRate: number;
-  normalEndTime: string;
-  note?: string | null;
-}): Promise<OTRecord> {
-  const { otMinutes, otAmount } = calculateOT({
-    normalEndTime: input.normalEndTime,
-    actualEndTime: input.endTime,
-    hourlyRate: input.hourlyRate,
-  });
-
+export async function upsertOTRecord(input: UpsertInput): Promise<OTRecord> {
+  const payload = buildUpsertPayload(input);
   const supabase = createServerSupabaseClient();
   const { data, error } = await supabase
     .from("ot_records")
-    .upsert(
-      {
-        work_date: input.workDate,
-        end_time: input.endTime,
-        ot_minutes: otMinutes,
-        ot_amount: otAmount.toFixed(2),
-        note: input.note ?? null,
-      },
-      { onConflict: "work_date" },
-    )
+    .upsert(payload, { onConflict: "work_date" })
     .select()
     .single();
+
+  if (error && isMissingDayKindColumn(error)) {
+    if (getDayKind({ dayKind: input.dayKind ?? "ot" }) !== "ot") {
+      throw new Error(DAY_KIND_MIGRATION_ERROR);
+    }
+
+    const { day_kind: _dayKind, ...withoutKind } = payload;
+    const fallback = await supabase
+      .from("ot_records")
+      .upsert(withoutKind, { onConflict: "work_date" })
+      .select()
+      .single();
+
+    if (fallback.error || !fallback.data) {
+      throw new Error(fallback.error?.message ?? "Failed to save OT record");
+    }
+
+    return mapRecord(fallback.data);
+  }
 
   if (error || !data) {
     throw new Error(error?.message ?? "Failed to save OT record");
@@ -199,6 +205,7 @@ export async function replaceAllOTRecords(
     endTime: string;
     otMinutes: number;
     otAmount: number;
+    dayKind?: DayKind;
     note?: string | null;
   }>,
 ): Promise<void> {
@@ -209,15 +216,31 @@ export async function replaceAllOTRecords(
   }
 
   const supabase = createServerSupabaseClient();
-  const { error } = await supabase.from("ot_records").insert(
-    records.map((record) => ({
-      work_date: record.workDate,
-      end_time: record.endTime,
-      ot_minutes: record.otMinutes,
-      ot_amount: record.otAmount.toFixed(2),
-      note: record.note ?? null,
-    })),
-  );
+  const rows = records.map((record) => ({
+    work_date: record.workDate,
+    end_time: record.endTime,
+    ot_minutes: record.otMinutes,
+    ot_amount: record.otAmount.toFixed(2),
+    note: record.note ?? null,
+    day_kind: record.dayKind === "off" || record.dayKind === "absent" ? record.dayKind : "ot",
+  }));
+
+  const { error } = await supabase.from("ot_records").insert(rows);
+
+  if (error && isMissingDayKindColumn(error)) {
+    const needsKind = rows.some((row) => row.day_kind !== "ot");
+    if (needsKind) {
+      throw new Error(DAY_KIND_MIGRATION_ERROR);
+    }
+
+    const fallback = await supabase.from("ot_records").insert(
+      rows.map(({ day_kind: _dayKind, ...row }) => row),
+    );
+    if (fallback.error) {
+      throw new Error(fallback.error.message);
+    }
+    return;
+  }
 
   if (error) {
     throw new Error(error.message);

@@ -33,7 +33,7 @@ export function SettingsView() {
       <PageHeader
         eyebrow="Settings"
         title="ตั้งค่า"
-        subtitle="อัตรา OT รอบนับ เวลาเลิกงานปกติ ธีม UI และการสำรองข้อมูล"
+        subtitle="อัตรา OT เป้าหมายรอบ เวลาเลิกงานปกติ ธีม UI และการสำรองข้อมูล"
       />
       <OTSettingsCard />
       <ThemeSection />
@@ -54,6 +54,7 @@ function OTSettingsCard() {
   const normalEndTime = useSettingsStore((state) => state.normalEndTime);
   const periodStartDay = useSettingsStore((state) => state.periodStartDay);
   const periodEndDay = useSettingsStore((state) => state.periodEndDay);
+  const cycleGoalAmount = useSettingsStore((state) => state.cycleGoalAmount);
   const setLocal = useSettingsStore((state) => state.setLocal);
   const hydrate = useSettingsStore((state) => state.hydrate);
   const showToast = useUIStore((state) => state.showToast);
@@ -65,6 +66,7 @@ function OTSettingsCard() {
       normalEndTime,
       periodStartDay: String(periodStartDay),
       periodEndDay: String(periodEndDay),
+      cycleGoalAmount: cycleGoalAmount.toFixed(2),
     },
   });
 
@@ -79,10 +81,17 @@ function OTSettingsCard() {
     normalEndTime: string;
     periodStartDay: string;
     periodEndDay: string;
+    cycleGoalAmount: string;
   }) {
     const nextRate = Number(values.hourlyRate);
     if (!Number.isFinite(nextRate) || nextRate < 0) {
       showToast("ค่า OT ต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0", "error");
+      return;
+    }
+
+    const nextGoal = Number(values.cycleGoalAmount);
+    if (!Number.isFinite(nextGoal) || nextGoal < 0) {
+      showToast("เป้าหมายต้องเป็นตัวเลขที่มากกว่าหรือเท่ากับ 0", "error");
       return;
     }
 
@@ -93,12 +102,19 @@ function OTSettingsCard() {
       return;
     }
 
-    const previous = { hourlyRate, normalEndTime, periodStartDay, periodEndDay };
+    const previous = {
+      hourlyRate,
+      normalEndTime,
+      periodStartDay,
+      periodEndDay,
+      cycleGoalAmount,
+    };
     setLocal({
       hourlyRate: nextRate,
       normalEndTime: values.normalEndTime,
       periodStartDay: nextStart,
       periodEndDay: nextEnd,
+      cycleGoalAmount: nextGoal,
     });
 
     if (!online) {
@@ -112,6 +128,7 @@ function OTSettingsCard() {
       normalEndTime: values.normalEndTime,
       periodStartDay: nextStart,
       periodEndDay: nextEnd,
+      cycleGoalAmount: nextGoal,
     });
 
     if (!result.ok) {
@@ -183,6 +200,15 @@ function OTSettingsCard() {
             ตัวอย่างรอบเดือนนี้: {formatPeriodRange(previewRange.start, previewRange.end)}
           </p>
         </div>
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          inputMode="decimal"
+          label="เป้าหมายต่อรอบ"
+          hint="บาท — ใส่ 0 ถ้าไม่ต้องการแสดงเป้า"
+          {...register("cycleGoalAmount")}
+        />
         <Button type="submit">บันทึก</Button>
       </form>
     </Card>
@@ -463,7 +489,13 @@ function DataSection() {
       showToast(result.error, "error");
       return;
     }
-    hydrate({ hourlyRate: 75, normalEndTime: "17:00", periodStartDay: 26, periodEndDay: 26 });
+    hydrate({
+      hourlyRate: 75,
+      normalEndTime: "17:00",
+      periodStartDay: 26,
+      periodEndDay: 26,
+      cycleGoalAmount: 0,
+    });
     setSavedThemes([]);
     showToast("ลบข้อมูลทั้งหมดแล้ว", "success");
     window.location.reload();

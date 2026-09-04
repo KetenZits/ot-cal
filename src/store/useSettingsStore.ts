@@ -6,16 +6,21 @@ interface SettingsState {
   normalEndTime: string;
   periodStartDay: number;
   periodEndDay: number;
+  cycleGoalAmount: number;
   loaded: boolean;
   hydrate: (settings: {
     hourlyRate: number;
     normalEndTime: string;
     periodStartDay?: number;
     periodEndDay?: number;
+    cycleGoalAmount?: number;
   }) => void;
   setLocal: (
     patch: Partial<
-      Pick<SettingsState, "hourlyRate" | "normalEndTime" | "periodStartDay" | "periodEndDay">
+      Pick<
+        SettingsState,
+        "hourlyRate" | "normalEndTime" | "periodStartDay" | "periodEndDay" | "cycleGoalAmount"
+      >
     >,
   ) => void;
 }
@@ -27,6 +32,7 @@ export const useSettingsStore = create<SettingsState>()(
       normalEndTime: "17:00",
       periodStartDay: 26,
       periodEndDay: 26,
+      cycleGoalAmount: 0,
       loaded: false,
       hydrate: (settings) =>
         set({
@@ -34,13 +40,14 @@ export const useSettingsStore = create<SettingsState>()(
           normalEndTime: settings.normalEndTime,
           periodStartDay: settings.periodStartDay ?? 26,
           periodEndDay: settings.periodEndDay ?? 26,
+          cycleGoalAmount: settings.cycleGoalAmount ?? 0,
           loaded: true,
         }),
       setLocal: (patch) => set(patch),
     }),
     {
       name: "ot-settings",
-      version: 2,
+      version: 3,
       migrate: (persisted) => {
         const state = (persisted ?? {}) as Partial<SettingsState>;
         return {
@@ -48,6 +55,7 @@ export const useSettingsStore = create<SettingsState>()(
           normalEndTime: state.normalEndTime ?? "17:00",
           periodStartDay: state.periodStartDay ?? 26,
           periodEndDay: state.periodEndDay ?? 26,
+          cycleGoalAmount: state.cycleGoalAmount ?? 0,
         };
       },
       partialize: (state) => ({
@@ -55,6 +63,7 @@ export const useSettingsStore = create<SettingsState>()(
         normalEndTime: state.normalEndTime,
         periodStartDay: state.periodStartDay,
         periodEndDay: state.periodEndDay,
+        cycleGoalAmount: state.cycleGoalAmount,
       }),
     },
   ),

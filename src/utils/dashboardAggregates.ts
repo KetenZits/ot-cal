@@ -1,4 +1,5 @@
 import type { OTRecord, OTPeriodSummary, ChartPoint } from "@/types/ot";
+import { getDayKind } from "@/types/ot";
 import {
   addDays,
   differenceInCalendarDays,
@@ -13,13 +14,19 @@ import { getOtYearBucketRange, toDateKey } from "./dateHelpers";
 export function summarizeRecords(records: OTRecord[]): OTPeriodSummary {
   const totalOTMinutes = records.reduce((sum, record) => sum + record.otMinutes, 0);
   const totalOTAmount = records.reduce((sum, record) => sum + record.otAmount, 0);
-  const otDays = records.filter((record) => record.otMinutes > 0).length;
+  const otDays = records.filter(
+    (record) => getDayKind(record) === "ot" && record.otMinutes > 0,
+  ).length;
+  const offDays = records.filter((record) => getDayKind(record) === "off").length;
+  const absentDays = records.filter((record) => getDayKind(record) === "absent").length;
 
   return {
     totalOTMinutes,
     totalOTHours: totalOTMinutes / 60,
     totalOTAmount,
     otDays,
+    offDays,
+    absentDays,
   };
 }
 
